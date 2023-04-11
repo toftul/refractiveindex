@@ -1,6 +1,6 @@
 # Easy Python interface to RefractiveIndex database
 
-The original database is here
+The original database<br>
 https://github.com/polyanskiy/refractiveindex.info-database
 
 Database files parsing was made with a modified version of `refractiveIndex.py` from [PyTMM project](https://github.com/kitchenknif/PyTMM) by [Pavel Dmitriev](https://github.com/kitchenknif).
@@ -40,6 +40,10 @@ You can find the proper “page” name by hovering your cursor on the link in t
 
 ![How to get page name](./fig/link.png)
 
-Or you can look up folders in this repository
-
+Or you can look up folders in this repository<br>
 https://github.com/polyanskiy/refractiveindex.info-database
+
+## Simular projects for Julia
+
+Julia interface to refractiveindex.info database<br>
+https://github.com/stillyslalom/RefractiveIndex.jl
