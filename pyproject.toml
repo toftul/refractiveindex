@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "refractiveindex"
+version = "0.0.1"
+description = ""
+authors = ["Ivan Toftul <toftul.ivan@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+scipy = "^1.9.3"
+pyyaml = "^5.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
