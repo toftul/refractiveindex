@@ -399,15 +399,15 @@ class RefractiveIndexMaterial:
         BD = RefractiveIndex()
         self.material = BD.getMaterial(shelf=shelf, book=book, page=page)
         
-    def get_refractive_index(self, wavelenght_nm):
-        return self.material.getRefractiveIndex(np.copy(wavelenght_nm))
+    def get_refractive_index(self, wavelength_nm):
+        return self.material.getRefractiveIndex(np.copy(wavelength_nm))
     
-    def get_extinction_coefficient(self, wavelenght_nm):
-        return self.material.getExtinctionCoefficient(np.copy(wavelenght_nm))
+    def get_extinction_coefficient(self, wavelength_nm):
+        return self.material.getExtinctionCoefficient(np.copy(wavelength_nm))
     
-    def get_epsilon(self, wavelenght_nm, exp_type='exp_minus_i_omega_t'):
-        n = self.get_refractive_index(wavelenght_nm)
-        k = self.get_extinction_coefficient(wavelenght_nm)
+    def get_epsilon(self, wavelength_nm, exp_type='exp_minus_i_omega_t'):
+        n = self.get_refractive_index(wavelength_nm)
+        k = self.get_extinction_coefficient(wavelength_nm)
         if exp_type=='exp_minus_i_omega_t':
             return (n + 1j*k)**2
         else:
