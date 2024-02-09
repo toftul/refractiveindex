@@ -35,7 +35,7 @@ class RefractiveIndex:
             print("done", file=sys.stderr)
 
         self.referencePath = os.path.normpath(databasePath)
-        fileName = os.path.join(self.referencePath, "library.yml")
+        fileName = os.path.join(self.referencePath, "library-nk.yml")
         with open(fileName, "rt", encoding="utf-8") as f:
             self.catalog = yaml.load(f, Loader=BaseLoader)
 
@@ -76,7 +76,7 @@ class RefractiveIndex:
                                 if 'DIVIDER' not in p:
                                     if p['PAGE'] == page:
                                         # print("From {0} opening {1}, {2}\n".format(sh['name'], b['name'], p['name']))
-                                        filename = os.path.join(self.referencePath, 'data', os.path.normpath(p['data']))
+                                        filename = os.path.join(self.referencePath, 'data-nk', os.path.normpath(p['data']))
                                         # print("Located at {}".format(filename))
         assert filename != ''
         return filename
