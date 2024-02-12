@@ -32,7 +32,7 @@ SiO.get_extinction_coefficient(wavelength_nm)
 ```
 
 Notes: 
-- here the time dependence is assumed to be $\mathrm{e}^{-\mathrm{i} \omega t}$, so $\operatorname{Im}\varepsilon > 0$ is responsible for the losses.
+- here the time dependence is assumed to be $\mathrm{e}^{-\mathrm{i} \omega t}$, so $\mathrm{Im}(\varepsilon) > 0$ is responsible for the losses.
 - if there is a space in the name, one should write underscore instead of it, i.e. not `page='Rodriguez-de Marcos'` but `page='Rodriguez-de_Marcos'`.
 
 
@@ -49,3 +49,11 @@ https://github.com/polyanskiy/refractiveindex.info-database
 
 Julia interface to refractiveindex.info database<br>
 https://github.com/stillyslalom/RefractiveIndex.jl
+
+## Possible problems
+
+Refractive index changed naming in its database, please upgrade the package
+```shell
+pip install --upgrade refractiveindex
+```
+and remove database folder at `~/.refractiveindex.info-database`.
