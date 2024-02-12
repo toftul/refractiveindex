@@ -35,7 +35,7 @@ class RefractiveIndex:
             print("done", file=sys.stderr)
 
         self.referencePath = os.path.normpath(databasePath)
-        fileName = os.path.join(self.referencePath, "library-nk.yml")
+        fileName = os.path.join(self.referencePath, "catalog-nk.yml")
         with open(fileName, "rt", encoding="utf-8") as f:
             self.catalog = yaml.load(f, Loader=BaseLoader)
 
