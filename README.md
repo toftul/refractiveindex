@@ -57,3 +57,5 @@ Refractive index changed naming in its database, please upgrade the package
 pip install --upgrade refractiveindex
 ```
 and remove database folder at `~/.refractiveindex.info-database`.
+
+The database is currently limited to dispersion and extinction ('n-k') data.
