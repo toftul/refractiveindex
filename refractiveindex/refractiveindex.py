@@ -130,12 +130,12 @@ class Material:
                                                                                     wavelengths=wavelengths,
                                                                                     values=n)
                     self.originalData = {'wavelength (um)': wavelengths, 
-                                         'n' : n}
+                                         'n' : np.array(n)}
                 elif (data['type'].split())[1] == 'k':
 
                     self.extinctionCoefficient = ExtinctionCoefficientData.setupExtinctionCoefficient(wavelengths, n)
                     self.originalData = {'wavelength (um)': wavelengths, 
-                                         'n' : 1j*n}
+                                         'n' : 1j*np.array(n)}
 
                 elif (data['type'].split())[1] == 'nk':
 
@@ -147,7 +147,7 @@ class Material:
                                                                                     values=n)
                     self.extinctionCoefficient = ExtinctionCoefficientData.setupExtinctionCoefficient(wavelengths, k)
                     self.originalData = {'wavelength (um)': wavelengths, 
-                                         'n' : n + 1j*k}
+                                         'n' : np.array(n) + 1j*np.array(k)}
                     
             elif (data['type'].split())[0] == 'formula':
 
