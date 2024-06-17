@@ -129,12 +129,12 @@ class Material:
                     self.refractiveIndex = RefractiveIndexData.setupRefractiveIndex(formula=-1,
                                                                                     wavelengths=wavelengths,
                                                                                     values=n)
-                    self.originalData = {'wavelength (um)': wavelengths, 
+                    self.originalData = {'wavelength (um)': np.array(wavelengths), 
                                          'n' : np.array(n)}
                 elif (data['type'].split())[1] == 'k':
 
                     self.extinctionCoefficient = ExtinctionCoefficientData.setupExtinctionCoefficient(wavelengths, n)
-                    self.originalData = {'wavelength (um)': wavelengths, 
+                    self.originalData = {'wavelength (um)': np.array(wavelengths), 
                                          'n' : 1j*np.array(n)}
 
                 elif (data['type'].split())[1] == 'nk':
@@ -146,7 +146,7 @@ class Material:
                                                                                     wavelengths=wavelengths,
                                                                                     values=n)
                     self.extinctionCoefficient = ExtinctionCoefficientData.setupExtinctionCoefficient(wavelengths, k)
-                    self.originalData = {'wavelength (um)': wavelengths, 
+                    self.originalData = {'wavelength (um)': np.array(wavelengths), 
                                          'n' : np.array(n) + 1j*np.array(k)}
                     
             elif (data['type'].split())[0] == 'formula':
