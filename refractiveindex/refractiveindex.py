@@ -102,6 +102,7 @@ class Material:
         """
         self.refractiveIndex = None
         self.extinctionCoefficient = None
+        self.originalData = None
 
         with open(filename, "rt", encoding="utf-8") as f:
             material = yaml.load(f, Loader=BaseLoader)
@@ -128,9 +129,13 @@ class Material:
                     self.refractiveIndex = RefractiveIndexData.setupRefractiveIndex(formula=-1,
                                                                                     wavelengths=wavelengths,
                                                                                     values=n)
+                    self.originalData = {'wavelength (um)': np.array(wavelengths), 
+                                         'n' : np.array(n)}
                 elif (data['type'].split())[1] == 'k':
 
                     self.extinctionCoefficient = ExtinctionCoefficientData.setupExtinctionCoefficient(wavelengths, n)
+                    self.originalData = {'wavelength (um)': np.array(wavelengths), 
+                                         'n' : 1j*np.array(n)}
 
                 elif (data['type'].split())[1] == 'nk':
 
@@ -141,6 +146,9 @@ class Material:
                                                                                     wavelengths=wavelengths,
                                                                                     values=n)
                     self.extinctionCoefficient = ExtinctionCoefficientData.setupExtinctionCoefficient(wavelengths, k)
+                    self.originalData = {'wavelength (um)': np.array(wavelengths), 
+                                         'n' : np.array(n) + 1j*np.array(k)}
+                    
             elif (data['type'].split())[0] == 'formula':
 
                 if self.refractiveIndex is not None:
@@ -158,6 +166,10 @@ class Material:
                                                                                 rangeMin=rangeMin,
                                                                                 rangeMax=rangeMax,
                                                                                 coefficients=coefficents)
+                wavelengths = np.linspace(rangeMin, rangeMax, 1000)
+                self.originalData = {'wavelength (um)': wavelengths,
+                                     'n' : self.refractiveIndex.getRefractiveIndex(wavelength=wavelengths*1000)}
+                
 
     def getRefractiveIndex(self, wavelength, bounds_error=True):
         """
