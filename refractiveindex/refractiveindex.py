@@ -14,6 +14,11 @@ except ImportError:
 # import collections
 
 
+# Commit on January 3, 2025 just prior to a major update of the database structure.
+# List of commits here: https://github.com/polyanskiy/refractiveindex.info-database/commits/master/
+_DATABASE_SHA = "451b9136b4b3566f6259b703990add5440ca125f"
+
+
 class RefractiveIndex:
     """Class that parses the refractiveindex.info YAML database"""
 
@@ -28,10 +33,10 @@ class RefractiveIndex:
           with tempfile.TemporaryDirectory() as tempdir:
             zip_filename = os.path.join(tempdir, "db.zip")
             print("downloading refractiveindex.info database...", file=sys.stderr)
-            urllib.request.urlretrieve('https://github.com/polyanskiy/refractiveindex.info-database/archive/refs/heads/master.zip', zip_filename)
+            urllib.request.urlretrieve(f'https://github.com/polyanskiy/refractiveindex.info-database/archive/{_DATABASE_SHA}.zip', zip_filename)
             print("extracting...", file=sys.stderr)
             with zipfile.ZipFile(zip_filename, 'r') as zf: zf.extractall(tempdir)
-            shutil.move(os.path.join(tempdir, "refractiveindex.info-database-master", "database"), databasePath)
+            shutil.move(os.path.join(tempdir, f"refractiveindex.info-database-{_DATABASE_SHA}", "database"), databasePath)
             print("done", file=sys.stderr)
 
         self.referencePath = os.path.normpath(databasePath)
