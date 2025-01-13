@@ -36,7 +36,7 @@ class RefractiveIndex:
             urllib.request.urlretrieve(f'https://github.com/polyanskiy/refractiveindex.info-database/archive/{_DATABASE_SHA}.zip', zip_filename)
             print("extracting...", file=sys.stderr)
             with zipfile.ZipFile(zip_filename, 'r') as zf: zf.extractall(tempdir)
-            shutil.move(os.path.join(tempdir, "refractiveindex.info-database-master", "database"), databasePath)
+            shutil.move(os.path.join(tempdir, "refractiveindex.info-database-{_DATABASE_SHA}", "database"), databasePath)
             print("done", file=sys.stderr)
 
         self.referencePath = os.path.normpath(databasePath)
