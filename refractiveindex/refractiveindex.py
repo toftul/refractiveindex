@@ -33,7 +33,7 @@ class RefractiveIndex:
           with tempfile.TemporaryDirectory() as tempdir:
             zip_filename = os.path.join(tempdir, "db.zip")
             print("downloading refractiveindex.info database...", file=sys.stderr)
-            urllib.request.urlretrieve(f'https://github.com/polyanskiy/refractiveindex.info-database/archive/refs/heads/{_DATABASE_SHA}.zip', zip_filename)
+            urllib.request.urlretrieve(f'https://github.com/polyanskiy/refractiveindex.info-database/archive/{_DATABASE_SHA}.zip', zip_filename)
             print("extracting...", file=sys.stderr)
             with zipfile.ZipFile(zip_filename, 'r') as zf: zf.extractall(tempdir)
             shutil.move(os.path.join(tempdir, "refractiveindex.info-database-master", "database"), databasePath)
