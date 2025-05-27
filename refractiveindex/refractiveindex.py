@@ -22,17 +22,39 @@ _DATABASE_SHA = "451b9136b4b3566f6259b703990add5440ca125f"
 class RefractiveIndex:
     """Class that parses the refractiveindex.info YAML database"""
 
-    def __init__(self, databasePath=os.path.join(os.path.expanduser("~"), ".refractiveindex.info-database"), auto_download=True):
+    def __init__(self, databasePath=os.path.join(os.path.expanduser("~"), ".refractiveindex.info-database"), auto_download=True,
+                 ssl_certificate_location: str | None = None):
         """
+        Initializes the RefractiveIndex class by downloading and parsing the refractiveindex.info YAML database.
 
-        :param databasePath:
+        Args:
+            databasePath (str): The path where the database will be stored. Defaults to ~/.refractiveindex.info-database.
+            auto_download (bool): Whether to automatically download the database if it doesn't exist. Defaults to True.
+            ssl_certificate_location (str | None): The path to a custom SSL certificate file to use for verification. If None, the default SSL context will be used. If an empty string, SSL verification will be disabled.
+
+        Raises:
+            Exception: If the database cannot be downloaded or extracted.
+
+        Notes:
+            If auto_download is True and the database does not exist, the script will download the latest version of the database from GitHub and extract it to the specified path.
         """
 
         if not os.path.exists(databasePath) and auto_download:
-          import tempfile, urllib.request, zipfile, shutil
+          import tempfile, urllib.request, zipfile, shutil, ssl
           with tempfile.TemporaryDirectory() as tempdir:
             zip_filename = os.path.join(tempdir, "db.zip")
             print("downloading refractiveindex.info database...", file=sys.stderr)
+            
+            # ignore ssl certificate errors
+            if ssl_certificate_location is not None :
+                if ssl_certificate_location == "" :
+                    # have the option to disable ssl verification
+                    ssl._create_default_https_context = ssl._create_unverified_context
+                else : 
+                    # Create an SSL context with your CA bundle
+                    ssl._create_default_https_context = ssl.create_default_context(cafile=ssl_certificate_location)
+                
+            
             urllib.request.urlretrieve(f'https://github.com/polyanskiy/refractiveindex.info-database/archive/{_DATABASE_SHA}.zip', zip_filename)
             print("extracting...", file=sys.stderr)
             with zipfile.ZipFile(zip_filename, 'r') as zf: zf.extractall(tempdir)
