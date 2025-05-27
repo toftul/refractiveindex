@@ -18,14 +18,16 @@ except ImportError:
 # List of commits here: https://github.com/polyanskiy/refractiveindex.info-database/commits/master/
 _DATABASE_SHA = "451b9136b4b3566f6259b703990add5440ca125f"
 
+_MASTER_URL = f'https://github.com/polyanskiy/refractiveindex.info-database/archive/{_DATABASE_SHA}.zip'
+
 
 class RefractiveIndex:
     """Class that parses the refractiveindex.info YAML database"""
 
     def __init__(self, 
                  databasePath=os.path.join(os.path.expanduser("~"), ".refractiveindex.info-database"), 
-                 auto_download=True,
-                 ssl_certificate_location: str | None = None,
+                 auto_download : bool = True,
+                 ssl_certificate_location: str = None,
                  update_database : bool = False):
         """
         Initializes the RefractiveIndex class by downloading and parsing the refractiveindex.info YAML database.
@@ -58,8 +60,7 @@ class RefractiveIndex:
                     # Create an SSL context with your CA bundle
                     ssl._create_default_https_context = ssl.create_default_context(cafile=ssl_certificate_location)
                 
-            
-            urllib.request.urlretrieve(f'https://github.com/polyanskiy/refractiveindex.info-database/archive/{_DATABASE_SHA}.zip', zip_filename)
+            urllib.request.urlretrieve(_MASTER_URL, zip_filename)
             print("extracting...", file=sys.stderr)
             with zipfile.ZipFile(zip_filename, 'r') as zf: zf.extractall(tempdir)
             shutil.move(os.path.join(tempdir, f"refractiveindex.info-database-{_DATABASE_SHA}", "database"), databasePath)
