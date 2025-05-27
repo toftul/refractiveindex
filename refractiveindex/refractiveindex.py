@@ -58,11 +58,20 @@ class RefractiveIndex:
                     ssl._create_default_https_context = ssl._create_unverified_context
                 else : 
                     # Create an SSL context with your CA bundle
+                    if  ssl_certificate_location[-4:] != ".pem" or not os.path.isfile(ssl_certificate_location):
+                        raise ValueError(f"It does not appear that the path you supplied points to an existing certificate file with '.pem' at the end: {ssl_certificate_location}")
                     ssl._create_default_https_context = ssl.create_default_context(cafile=ssl_certificate_location)
                 
             urllib.request.urlretrieve(_MASTER_URL, zip_filename)
             print("extracting...", file=sys.stderr)
             with zipfile.ZipFile(zip_filename, 'r') as zf: zf.extractall(tempdir)
+            
+            # remove the old database if it exists. We should only arrive here if update_database = True or it doesn't exist
+            if os.path.isdir(databasePath) : 
+                print("Removing the old database...")
+                shutil.rmtree(databasePath)
+            
+            # move the downloaded database to the database location
             shutil.move(os.path.join(tempdir, f"refractiveindex.info-database-{_DATABASE_SHA}", "database"), databasePath)
             print("done", file=sys.stderr)
 
