@@ -22,14 +22,18 @@ _DATABASE_SHA = "451b9136b4b3566f6259b703990add5440ca125f"
 class RefractiveIndex:
     """Class that parses the refractiveindex.info YAML database"""
 
-    def __init__(self, databasePath=os.path.join(os.path.expanduser("~"), ".refractiveindex.info-database"), auto_download=True,
-                 ssl_certificate_location: str | None = None):
+    def __init__(self, 
+                 databasePath=os.path.join(os.path.expanduser("~"), ".refractiveindex.info-database"), 
+                 auto_download=True,
+                 ssl_certificate_location: str | None = None,
+                 update_database : bool = False):
         """
         Initializes the RefractiveIndex class by downloading and parsing the refractiveindex.info YAML database.
 
         Args:
             databasePath (str): The path where the database will be stored. Defaults to ~/.refractiveindex.info-database.
             auto_download (bool): Whether to automatically download the database if it doesn't exist. Defaults to True.
+            update_database (bool): If True the database is being downloaded again, even if it already exists. Defaults to False.
             ssl_certificate_location (str | None): The path to a custom SSL certificate file to use for verification. If None, the default SSL context will be used. If an empty string, SSL verification will be disabled.
 
         Raises:
@@ -39,7 +43,7 @@ class RefractiveIndex:
             If auto_download is True and the database does not exist, the script will download the latest version of the database from GitHub and extract it to the specified path.
         """
 
-        if not os.path.exists(databasePath) and auto_download:
+        if not os.path.exists(databasePath) and auto_download or update_database:
           import tempfile, urllib.request, zipfile, shutil, ssl
           with tempfile.TemporaryDirectory() as tempdir:
             zip_filename = os.path.join(tempdir, "db.zip")
@@ -434,8 +438,8 @@ class NoExtinctionCoefficient(Exception):
     
 
 class RefractiveIndexMaterial:
-    def __init__(self, shelf, book, page):
-        BD = RefractiveIndex()
+    def __init__(self, shelf, book, page, **ri_kwargs):
+        BD = RefractiveIndex(**ri_kwargs)
         self.material = BD.getMaterial(shelf=shelf, book=book, page=page)
         
     def get_refractive_index(self, wavelength_nm):
