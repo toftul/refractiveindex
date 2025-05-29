@@ -18,24 +18,60 @@ except ImportError:
 # List of commits here: https://github.com/polyanskiy/refractiveindex.info-database/commits/master/
 _DATABASE_SHA = "451b9136b4b3566f6259b703990add5440ca125f"
 
+_MASTER_URL = f'https://github.com/polyanskiy/refractiveindex.info-database/archive/{_DATABASE_SHA}.zip'
+
 
 class RefractiveIndex:
     """Class that parses the refractiveindex.info YAML database"""
 
-    def __init__(self, databasePath=os.path.join(os.path.expanduser("~"), ".refractiveindex.info-database"), auto_download=True):
+    def __init__(self, 
+                 databasePath=os.path.join(os.path.expanduser("~"), ".refractiveindex.info-database"), 
+                 auto_download : bool = True,
+                 ssl_certificate_location: str = None,
+                 update_database : bool = False):
+        """
+        Initializes the RefractiveIndex class by downloading and parsing the refractiveindex.info YAML database.
+
+        Args:
+            databasePath (str): The path where the database will be stored. Defaults to ~/.refractiveindex.info-database.
+            auto_download (bool): Whether to automatically download the database if it doesn't exist. Defaults to True.
+            update_database (bool): If True the database is being downloaded again, even if it already exists. Defaults to False.
+            ssl_certificate_location (str | None): The path to a custom SSL certificate file to use for verification. If None, the default SSL context will be used. If an empty string, SSL verification will be disabled.
+
+        Raises:
+            Exception: If the database cannot be downloaded or extracted.
+
+        Notes:
+            If auto_download is True and the database does not exist, the script will download the latest version of the database from GitHub and extract it to the specified path.
         """
 
-        :param databasePath:
-        """
-
-        if not os.path.exists(databasePath) and auto_download:
-          import tempfile, urllib.request, zipfile, shutil
+        if not os.path.exists(databasePath) and auto_download or update_database:
+          import tempfile, urllib.request, zipfile, shutil, ssl
           with tempfile.TemporaryDirectory() as tempdir:
             zip_filename = os.path.join(tempdir, "db.zip")
             print("downloading refractiveindex.info database...", file=sys.stderr)
-            urllib.request.urlretrieve(f'https://github.com/polyanskiy/refractiveindex.info-database/archive/{_DATABASE_SHA}.zip', zip_filename)
+            
+            # ignore ssl certificate errors
+            if ssl_certificate_location is not None :
+                if ssl_certificate_location == "" :
+                    # have the option to disable ssl verification
+                    ssl._create_default_https_context = ssl._create_unverified_context
+                else : 
+                    # Create an SSL context with your CA bundle
+                    if  ssl_certificate_location[-4:] != ".pem" or not os.path.isfile(ssl_certificate_location):
+                        raise ValueError(f"It does not appear that the path you supplied points to an existing certificate file with '.pem' at the end: {ssl_certificate_location}")
+                    ssl._create_default_https_context = ssl.create_default_context(cafile=ssl_certificate_location)
+                
+            urllib.request.urlretrieve(_MASTER_URL, zip_filename)
             print("extracting...", file=sys.stderr)
             with zipfile.ZipFile(zip_filename, 'r') as zf: zf.extractall(tempdir)
+            
+            # remove the old database if it exists. We should only arrive here if update_database = True or it doesn't exist
+            if os.path.isdir(databasePath) : 
+                print("Removing the old database...")
+                shutil.rmtree(databasePath)
+            
+            # move the downloaded database to the database location
             shutil.move(os.path.join(tempdir, f"refractiveindex.info-database-{_DATABASE_SHA}", "database"), databasePath)
             print("done", file=sys.stderr)
 
@@ -412,8 +448,8 @@ class NoExtinctionCoefficient(Exception):
     
 
 class RefractiveIndexMaterial:
-    def __init__(self, shelf, book, page):
-        BD = RefractiveIndex()
+    def __init__(self, shelf, book, page, **ri_kwargs):
+        BD = RefractiveIndex(**ri_kwargs)
         self.material = BD.getMaterial(shelf=shelf, book=book, page=page)
         
     def get_refractive_index(self, wavelength_nm):
