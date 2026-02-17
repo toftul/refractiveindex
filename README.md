@@ -37,7 +37,7 @@ bk7.get_refractive_index(589.3)
 # Array input
 wavelengths = np.array([400, 500, 600, 700])
 SiO.get_refractive_index(wavelengths)
-# array([1.9892, 1.9728, 1.9655, 1.9617])
+# array([2.15092857, 1.999, 1.96553846, 1.942])
 ```
 
 Notes:
