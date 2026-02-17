@@ -1,1 +1,1 @@
-from .refractiveindex import RefractiveIndexMaterial
+from .refractiveindex import RefractiveIndexMaterial, NoExtinctionCoefficient
