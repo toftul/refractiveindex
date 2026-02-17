@@ -1,4 +1,4 @@
-# Easy Python interface to RefractiveIndex database
+# Python interface to RefractiveIndex database
 
 ![Tests](https://github.com/toftul/refractiveindex/actions/workflows/build-ci.yml/badge.svg)
 
