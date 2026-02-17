@@ -1,5 +1,7 @@
 # Easy Python interface to RefractiveIndex database
 
+![Tests](https://github.com/toftul/refractiveindex/actions/workflows/build-ci.yml/badge.svg)
+
 The original database<br>
 https://github.com/polyanskiy/refractiveindex.info-database
 
