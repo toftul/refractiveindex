@@ -3,8 +3,6 @@
 The original database<br>
 https://github.com/polyanskiy/refractiveindex.info-database
 
-Database files parsing was made with a modified version of `refractiveIndex.py` from [PyTMM project](https://github.com/kitchenknif/PyTMM) by [Pavel Dmitriev](https://github.com/kitchenknif).
-
 ## Installation
 
 ```
@@ -57,10 +55,10 @@ You can find the proper "page" name by hovering your cursor on the link in the D
 Or you can look up folders in this repository<br>
 https://github.com/polyanskiy/refractiveindex.info-database
 
-## Similar projects for Julia
+## Similar projects
 
-Julia interface to refractiveindex.info database<br>
-https://github.com/stillyslalom/RefractiveIndex.jl
+- [PyTMM](https://github.com/kitchenknif/PyTMM) by [Pavel Dmitriev](https://github.com/kitchenknif) — the original database parsing code this project was based on
+- [RefractiveIndex.jl](https://github.com/stillyslalom/RefractiveIndex.jl) — Julia interface to refractiveindex.info database
 
 ## Possible problems
 
