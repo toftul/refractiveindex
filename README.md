@@ -52,7 +52,7 @@ Notes:
 
 You can find the proper "page" name by hovering your cursor on the link in the Data section
 
-![How to get page name](./fig/link.png)
+![How to get page name](./docs/images/link.png)
 
 Or you can look up folders in this repository<br>
 https://github.com/polyanskiy/refractiveindex.info-database
