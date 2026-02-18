@@ -69,3 +69,7 @@ If the upstream database has changed its structure, upgrade the package
 pip install --upgrade refractiveindex
 ```
 and remove the database folder at `~/.refractiveindex.info-database`.
+
+## TODO
+
+1. Include EODG data
