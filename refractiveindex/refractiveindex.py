@@ -303,3 +303,6 @@ class RefractiveIndexMaterial:
             return (n + 1j * k) ** 2
         else:
             return (n - 1j * k) ** 2
+        
+    def get_wl_range(self):
+        return self._wl_range
