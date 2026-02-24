@@ -58,12 +58,12 @@ The same parameter works for `get_extinction_coefficient`, `get_epsilon`, and `g
 
 | Unit | String | Conversion from µm |
 |---|---|---|
-| meters | `'m'` | $\lambda{[\text{m}]} = \lambda{[\mu\text{m}]} \: 10^{-6}$ |
-| nanometers | `'nm'` | $\lambda{[\text{nm}]} = \lambda{[\mu\text{m}]} \: 10^{3}$ |
-| Angstroms | `'A'` | $\lambda{[\r{A}]} = \lambda{[\mu\text{m}]} \: 10^{4}$ |
+| meters | `'m'` | $\lambda{[\text{m}]} = \lambda{[\mu\text{m}]} \, 10^{-6}$ |
+| nanometers | `'nm'` | $\lambda{[\text{nm}]} = \lambda{[\mu\text{m}]} \, 10^{3}$ |
+| Angstroms | `'A'` | $\lambda{[\text{Å}]} = \lambda{[\mu\text{m}]} \, 10^{4}$ |
 | wavenumbers | `'cm-1'` | $\tilde{\nu}{[\text{cm}^{-1}]} = 10^4 / \lambda{[\mu\text{m}]}$ |
-| terahertz | `'THz'` | $\nu{[\text{THz}]} = \frac{c[\text{m}/\text{s}] \: 10^{-6}}{\lambda{[\mu\text{m}]}}$ |
-| electron volts | `'eV'` |  $E [\text{eV}] = \frac{h[\text{J}\: \text{s}]\: c[\text{m}/\text{s}] \: 10^{6}}{e[\text{C}] \: \lambda [\mu \text{m}]}$  |
+| terahertz | `'THz'` | $\nu{[\text{THz}]} = \frac{c[\text{m}/\text{s}] \, 10^{-6}}{\lambda{[\mu\text{m}]}}$ |
+| electron volts | `'eV'` |  $E [\text{eV}] = \frac{h[\text{J}\, \text{s}]\, c[\text{m}/\text{s}] \, 10^{6}}{e[\text{C}] \, \lambda [\mu \text{m}]}$  |
 
 Here $c$ is the speed of light, $h$ is the Plank constant, $e$ is the elementary charge. 
 
