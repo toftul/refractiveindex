@@ -251,6 +251,8 @@ class RefractiveIndexMaterial:
 
                 elif subtype == "k":
                     self._k_func = _make_interpolator(wl, col1)
+                    if self._wl_range is None:
+                        self._wl_range = (wl[0], wl[-1])
                     if self._original_data is None:
                         self._original_data = {"wavelength (um)": wl, "n": 1j * col1}
 
@@ -305,4 +307,7 @@ class RefractiveIndexMaterial:
             return (n - 1j * k) ** 2
         
     def get_wl_range(self):
-        return self._wl_range
+        """Return the valid wavelength range as (min, max) in nanometers, or None if unknown."""
+        if self._wl_range is None:
+            return None
+        return (self._wl_range[0] * 1000.0, self._wl_range[1] * 1000.0)
