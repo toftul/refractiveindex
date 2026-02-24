@@ -56,15 +56,16 @@ bk7.get_refractive_index(2.108, unit='eV')       # electron volts
 
 The same parameter works for `get_extinction_coefficient`, `get_epsilon`, and `get_wl_range`.
 
-| Unit | String | Type |
+| Unit | String | Conversion from µm |
 |---|---|---|
-| meters | `'m'` | length |
-| micrometers | `'um'` | length |
-| nanometers | `'nm'` | length (default) |
-| Angstroms | `'A'` | length |
-| wavenumbers | `'cm-1'` | reciprocal (self-inverse) |
-| terahertz | `'THz'` | reciprocal (self-inverse) |
-| electron volts | `'eV'` | reciprocal (self-inverse) |
+| meters | `'m'` | $\lambda{[\text{m}]} = \lambda{[\mu\text{m}]} \times 10^{-6}$ |
+| nanometers | `'nm'` | $\lambda{[\text{nm}]} = \lambda{[\mu\text{m}]} \times 10^{3}$ |
+| Angstroms | `'A'` | $\lambda{[\r{A}]} = \lambda{[\mu\text{m}]} \times 10^{4}$ |
+| wavenumbers | `'cm-1'` | $\tilde{\nu}{[\text{cm}^{-1}]} = 10^4 / \lambda{[\mu\text{m}]}$ |
+| terahertz | `'THz'` | $\nu{[\text{THz}]} = c / \lambda{[\mu\text{m}]}$ |
+| electron volts | `'eV'` | $E{[\text{eV}]} = hc / \lambda{[\mu\text{m}]}$ |
+
+Here $c$ is the speed of light, $h$ is the Plank constant. 
 
 ### Valid wavelength range
 
