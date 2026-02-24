@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "refractiveindex"
-version = "1.0.0"
+version = "1.0.1"
 description = "A python interface to the refractiveindex.info database."
 authors = ["Ivan Toftul <toftul.ivan@gmail.com>"]
 readme = "README.md"

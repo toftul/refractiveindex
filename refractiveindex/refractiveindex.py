@@ -190,6 +190,51 @@ def _compute_formula(formula_id, coefficients, wl_um):
         raise ValueError(f"Unknown formula type: {formula_id}")
 
 
+# Unit registry: maps unit name -> (to_um, from_um) callable pair.
+# to_um:   converts a wavelength/wavenumber/frequency/energy value to micrometers.
+# from_um: converts micrometers back to that unit.
+# Add new units here; no other code needs to change.
+# Note: energy/frequency units (eV, THz, cm-1) are self-inverse because λ ∝ 1/x.
+h_const = 6.62607015e-34   # Planck constant [J·s]
+c_const = 299792458        # Speed of light [m/s]
+e_const = 1.602176634e-19  # Elementary charge [C]
+
+# Derived: hc in eV·µm  (h [J·s] * c [m/s] / e [J/eV] * 1e6 [µm/m])
+_hc_eV_um = h_const * c_const / e_const * 1e6
+
+# Derived: c in µm·THz  (c [m/s] * 1e-6 [µm/m] / 1e12 [THz/Hz] * 1e12 simplifies to c * 1e-6)
+_c_um_THz = c_const * 1e-6
+
+_UNITS = {
+    # Length units
+    "m":       (lambda wl: wl * 1e6,              lambda wl_um: wl_um * 1e-6),
+    "mm":      (lambda wl: wl * 1e3,              lambda wl_um: wl_um * 1e-3),
+    "um":      (lambda wl: wl,                    lambda wl_um: wl_um),
+    "nm":      (lambda wl: wl * 1e-3,             lambda wl_um: wl_um * 1e3),
+    "A":       (lambda wl: wl * 1e-4,             lambda wl_um: wl_um * 1e4),
+    # Reciprocal / energy units  (to_um == from_um)
+    "cm-1":    (lambda wl: 1e4 / wl,              lambda wl_um: 1e4 / wl_um),
+    "THz":     (lambda wl: _c_um_THz / wl,        lambda wl_um: _c_um_THz / wl_um),
+    "eV":      (lambda wl: _hc_eV_um / wl,        lambda wl_um: _hc_eV_um / wl_um),
+}
+
+
+def _to_um(wl, unit):
+    try:
+        to_um, _ = _UNITS[unit]
+    except KeyError:
+        raise ValueError(f"unit must be one of {list(_UNITS)}, got {unit!r}")
+    return to_um(np.asarray(wl, dtype=float))
+
+
+def _from_um(wl_um, unit):
+    try:
+        _, from_um = _UNITS[unit]
+    except KeyError:
+        raise ValueError(f"unit must be one of {list(_UNITS)}, got {unit!r}")
+    return from_um(wl_um)
+
+
 def _make_interpolator(wavelengths, values):
     if len(wavelengths) == 1:
         val = values[0]
@@ -204,7 +249,7 @@ class NoExtinctionCoefficient(Exception):
 class RefractiveIndexMaterial:
     """Public API for looking up optical material properties.
 
-    All wavelengths are in nanometers.
+    Wavelengths default to nanometers. Pass unit='um' to use micrometers.
     """
 
     def __init__(self, shelf, book, page, *,
@@ -283,31 +328,59 @@ class RefractiveIndexMaterial:
                     "n": _compute_formula(formula_id, coefficients, wl_sample),
                 }
 
-    def get_refractive_index(self, wavelength_nm):
-        """Return refractive index n at the given wavelength(s) in nm."""
+    def get_refractive_index(self, wavelength, unit="nm"):
+        """Return refractive index n at the given wavelength(s).
+
+        Args:
+            wavelength: Wavelength(s) in the specified unit.
+            unit: Input unit. Supported: 'm', 'mm', 'um', 'nm' (default),
+                  'A' (Angstrom), 'cm-1', 'THz', 'eV'.
+        """
         if self._n_func is None:
             raise Exception("No refractive index specified for this material")
-        wl_um = np.asarray(wavelength_nm, dtype=float) / 1000.0
-        return self._n_func(wl_um)
+        return self._n_func(_to_um(wavelength, unit))
 
-    def get_extinction_coefficient(self, wavelength_nm):
-        """Return extinction coefficient k at the given wavelength(s) in nm."""
+    def get_extinction_coefficient(self, wavelength, unit="nm"):
+        """Return extinction coefficient k at the given wavelength(s).
+
+        Args:
+            wavelength: Wavelength(s) in the specified unit.
+            unit: Input unit. Supported: 'm', 'mm', 'um', 'nm' (default),
+                  'A' (Angstrom), 'cm-1', 'THz', 'eV'.
+        """
         if self._k_func is None:
             raise NoExtinctionCoefficient("No extinction coefficient specified for this material")
-        wl_um = np.asarray(wavelength_nm, dtype=float) / 1000.0
-        return self._k_func(wl_um)
+        return self._k_func(_to_um(wavelength, unit))
 
-    def get_epsilon(self, wavelength_nm, exp_type="exp_minus_i_omega_t"):
-        """Return complex dielectric permittivity at the given wavelength(s) in nm."""
-        n = self.get_refractive_index(wavelength_nm)
-        k = self.get_extinction_coefficient(wavelength_nm)
+    def get_epsilon(self, wavelength, unit="nm", exp_type="exp_minus_i_omega_t"):
+        """Return complex dielectric permittivity at the given wavelength(s).
+
+        Args:
+            wavelength: Wavelength(s) in the specified unit.
+            unit: Input unit. Supported: 'm', 'mm', 'um', 'nm' (default),
+                  'A' (Angstrom), 'cm-1', 'THz', 'eV'.
+            exp_type: Time convention, 'exp_minus_i_omega_t' (default) or 'exp_plus_i_omega_t'.
+        """
+        n = self.get_refractive_index(wavelength, unit=unit)
+        k = self.get_extinction_coefficient(wavelength, unit=unit)
         if exp_type == "exp_minus_i_omega_t":
             return (n + 1j * k) ** 2
         else:
             return (n - 1j * k) ** 2
-        
-    def get_wl_range(self):
-        """Return the valid wavelength range as (min, max) in nanometers, or None if unknown."""
+
+    def get_wl_range(self, unit="nm"):
+        """Return the valid range as (min, max) in the requested unit, or None if unknown.
+
+        Args:
+            unit: Output unit. Supported: 'm', 'mm', 'um', 'nm' (default),
+                  'A' (Angstrom), 'cm-1', 'THz', 'eV'.
+
+        Note:
+            The result is always sorted (min, max). For reciprocal units
+            ('cm-1', 'THz', 'eV') this reverses the wavelength ordering.
+        """
         if self._wl_range is None:
             return None
-        return (self._wl_range[0] * 1000.0, self._wl_range[1] * 1000.0)
+        a = _from_um(self._wl_range[0], unit)
+        b = _from_um(self._wl_range[1], unit)
+        return (min(a, b), max(a, b))
