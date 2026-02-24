@@ -40,9 +40,9 @@ SiO.get_refractive_index(wavelengths)
 # array([2.15092857, 1.999, 1.96553846, 1.942])
 ```
 
-### Wavelength units
+### Units
 
-All methods accept an optional `unit=` parameter. The following calls are all equivalent:
+All methods accept an optional `unit=` parameter. Default is `nm`. The following calls are all equivalent:
 
 ```python
 bk7.get_refractive_index(589.3)                 # nm (default)
@@ -58,14 +58,14 @@ The same parameter works for `get_extinction_coefficient`, `get_epsilon`, and `g
 
 | Unit | String | Conversion from µm |
 |---|---|---|
-| meters | `'m'` | $\lambda{[\text{m}]} = \lambda{[\mu\text{m}]} \times 10^{-6}$ |
-| nanometers | `'nm'` | $\lambda{[\text{nm}]} = \lambda{[\mu\text{m}]} \times 10^{3}$ |
-| Angstroms | `'A'` | $\lambda{[\r{A}]} = \lambda{[\mu\text{m}]} \times 10^{4}$ |
+| meters | `'m'` | $\lambda{[\text{m}]} = \lambda{[\mu\text{m}]} \: 10^{-6}$ |
+| nanometers | `'nm'` | $\lambda{[\text{nm}]} = \lambda{[\mu\text{m}]} \: 10^{3}$ |
+| Angstroms | `'A'` | $\lambda{[\r{A}]} = \lambda{[\mu\text{m}]} \: 10^{4}$ |
 | wavenumbers | `'cm-1'` | $\tilde{\nu}{[\text{cm}^{-1}]} = 10^4 / \lambda{[\mu\text{m}]}$ |
-| terahertz | `'THz'` | $\nu{[\text{THz}]} = c / \lambda{[\mu\text{m}]}$ |
-| electron volts | `'eV'` | $E{[\text{eV}]} = hc / \lambda{[\mu\text{m}]}$ |
+| terahertz | `'THz'` | $\nu{[\text{THz}]} = \frac{c[\text{m}/\text{s}] \: 10^{-6}}{\lambda{[\mu\text{m}]}}$ |
+| electron volts | `'eV'` |  $E [\text{eV}] = \frac{h[\text{J}\: \text{s}]\: c[\text{m}/\text{s}] \: 10^{6}}{e[\text{C}] \: \lambda [\mu \text{m}]}$  |
 
-Here $c$ is the speed of light, $h$ is the Plank constant. 
+Here $c$ is the speed of light, $h$ is the Plank constant, $e$ is the elementary charge. 
 
 ### Valid wavelength range
 
@@ -78,7 +78,7 @@ bk7.get_wl_range(unit='um')   # e.g. (0.3, 2.5)        µm
 bk7.get_wl_range(unit='cm-1') # e.g. (4000.0, 33333.3) cm⁻¹
 ```
 
-For wavenumbers (`cm-1`) the result is always returned as `(min, max)` even though wavenumber is the reciprocal of wavelength.
+Result is always returned as `(min, max)`. 
 
 ### Out-of-range behavior
 
