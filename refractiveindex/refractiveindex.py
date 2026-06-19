@@ -11,9 +11,9 @@ except ImportError:
     from yaml import BaseLoader
 
 
-# Latest commit as of 2026-02-17
-# https://github.com/polyanskiy/refractiveindex.info-database/commits/master/
-_DATABASE_SHA = "a66ef8805cdb200973fc7ae9181587e1d89d14eb"
+# Default database SHA. Latest SHA will be found automatically if this is not set.
+# https://github.com/polyanskiy/refractiveindex.info-database/commits/main
+_DATABASE_SHA = None
 
 _DEFAULT_DB_PATH = Path.home() / ".refractiveindex.info-database"
 
@@ -21,14 +21,37 @@ _DEFAULT_DB_PATH = Path.home() / ".refractiveindex.info-database"
 _catalog_cache = {}
 
 
-def _download_database(db_path, ssl_certificate_location=None):
+def _get_latest_commit_hash():
+    """Get the latest commit hash from the main branch of the refractiveindex.info-database repository."""
+    try:
+        # Use GitHub API to get the latest commit SHA
+        import urllib.request
+        import json
+        
+        url = "https://api.github.com/repos/polyanskiy/refractiveindex.info-database/commits/main"
+        with urllib.request.urlopen(url) as response:
+            data = json.loads(response.read().decode('utf-8'))
+            return data['sha']
+    except Exception as e:
+        print(f"Failed to get latest commit hash: {e}", file=sys.stderr)
+        return None
+
+
+def _download_database(db_path, ssl_certificate_location=None, commit_hash=_DATABASE_SHA):
     import shutil
     import ssl
     import tempfile
     import urllib.request
     import zipfile
 
-    url = f"https://github.com/polyanskiy/refractiveindex.info-database/archive/{_DATABASE_SHA}.zip"
+    # Use provided commit hash or get the latest one
+    if commit_hash is None:
+        commit_hash = _get_latest_commit_hash()
+        if commit_hash is None:
+            # Fallback to a known good commit if we can't fetch the latest
+            commit_hash = "ff11b5897ef0754b15d939d921eb6c745693cbd1"
+    
+    url = f"https://github.com/polyanskiy/refractiveindex.info-database/archive/{commit_hash}.zip"
 
     if ssl_certificate_location is not None:
         if ssl_certificate_location == "":
@@ -52,8 +75,14 @@ def _download_database(db_path, ssl_certificate_location=None):
             print("removing old database...", file=sys.stderr)
             shutil.rmtree(db_path)
 
-        extracted = Path(tempdir) / f"refractiveindex.info-database-{_DATABASE_SHA}" / "database"
+        extracted = Path(tempdir) / f"refractiveindex.info-database-{commit_hash}" / "database"
         shutil.move(str(extracted), str(db_path))
+        
+        # Save the commit hash to version file
+        version_file = db_path / ".version"
+        with open(version_file, 'w') as f:
+            f.write(commit_hash)
+        
         print("done", file=sys.stderr)
 
 
@@ -61,6 +90,30 @@ def _ensure_database(db_path, auto_download, update_database, ssl_certificate_lo
     if not db_path.exists() and auto_download or update_database:
         _download_database(db_path, ssl_certificate_location)
     return db_path
+
+
+def _check_for_updates(db_path, ssl_certificate_location=None):
+    """Check if there's a newer version of the database available and update if needed."""
+    try:
+        # Get the current commit hash from the database directory
+        version_file = db_path / ".version"
+        if version_file.exists():
+            with open(version_file, 'r') as f:
+                current_hash = f.read().strip()
+        else:
+            current_hash = None
+        
+        # Get the latest commit hash
+        latest_hash = _get_latest_commit_hash()
+        
+        if latest_hash and (current_hash is None or current_hash != latest_hash):
+            print(f"Updating database from {current_hash or 'unknown'} to {latest_hash}", file=sys.stderr)
+            _download_database(db_path, ssl_certificate_location, commit_hash=latest_hash)
+            return True
+        return False
+    except Exception as e:
+        print(f"Failed to check for updates: {e}", file=sys.stderr)
+        return False
 
 
 def _load_catalog(db_path):
@@ -266,6 +319,10 @@ class RefractiveIndexMaterial:
             db_path = Path(db_path)
 
         _ensure_database(db_path, auto_download, update_database, ssl_certificate_location)
+        
+        # Check for updates if requested
+        if update_database:
+            _check_for_updates(db_path, ssl_certificate_location)
         catalog = _load_catalog(db_path)
 
         key = (shelf, book, page)

@@ -340,3 +340,25 @@ class TestEpsilon(unittest.TestCase):
         # Real parts should be equal, imaginary parts opposite sign
         self.assertAlmostEqual(eps_minus.real, eps_plus.real)
         self.assertAlmostEqual(eps_minus.imag, -eps_plus.imag)
+
+
+class TestDatabaseUpdates(unittest.TestCase):
+    """Tests for database update functionality."""
+
+    def test_database_version_file_exists(self):
+        """Test that database version file exists after material loading."""
+        from pathlib import Path
+        version_file = Path.home() / '.refractiveindex.info-database' / '.version'
+        
+        # Load a material (this should create/update the version file)
+        m = ri.RefractiveIndexMaterial(shelf='main', book='SiO2', page='Malitson')
+        
+        # Check that version file exists
+        self.assertTrue(version_file.exists())
+        
+        # Check that it contains some content (hash)
+        with open(version_file, 'r') as f:
+            hash_content = f.read().strip()
+        
+        # Should not be empty
+        self.assertGreater(len(hash_content), 0)
