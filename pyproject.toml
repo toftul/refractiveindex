@@ -4,6 +4,22 @@ version = "1.0.2"
 description = "A python interface to the refractiveindex.info database."
 authors = ["Ivan Toftul <toftul.ivan@gmail.com>"]
 readme = "README.md"
+license = "MIT"
+homepage = "https://github.com/toftul/refractiveindex"
+repository = "https://github.com/toftul/refractiveindex"
+keywords = ["optics", "refractive index", "photonics", "materials", "refractiveindex.info"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Physics",
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
