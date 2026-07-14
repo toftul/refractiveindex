@@ -331,6 +331,15 @@ class TestEpsilon(unittest.TestCase):
         expected = (n - 1j * k) ** 2
         self.assertAlmostEqual(eps, expected)
 
+    def test_epsilon_no_extinction_data(self):
+        """Materials without k data: epsilon = n^2 (k treated as 0)."""
+        m = ri.RefractiveIndexMaterial(shelf='main', book='SiO2', page='Malitson')
+        wl = 800
+        n = m.get_refractive_index(wl)
+        eps = m.get_epsilon(wl)
+        self.assertAlmostEqual(eps, n ** 2)
+        self.assertEqual(eps.imag, 0)
+
     def test_epsilon_n_ik_consistency(self):
         """Verify (n + ik)^2 == epsilon identity for both conventions."""
         m = ri.RefractiveIndexMaterial(shelf='main', book='Ag', page='Johnson')

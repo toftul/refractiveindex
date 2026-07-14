@@ -417,9 +417,15 @@ class RefractiveIndexMaterial:
             unit: Input unit. Supported: 'm', 'mm', 'um', 'nm' (default),
                   'A' (Angstrom), 'cm-1', 'THz', 'eV'.
             exp_type: Time convention, 'exp_minus_i_omega_t' (default) or 'exp_plus_i_omega_t'.
+
+        Note:
+            If the material has no extinction coefficient data, k is taken as 0.
         """
         n = self.get_refractive_index(wavelength, unit=unit)
-        k = self.get_extinction_coefficient(wavelength, unit=unit)
+        if self._k_func is None:
+            k = 0.0
+        else:
+            k = self.get_extinction_coefficient(wavelength, unit=unit)
         if exp_type == "exp_minus_i_omega_t":
             return (n + 1j * k) ** 2
         else:
