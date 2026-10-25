@@ -339,8 +339,8 @@ class RefractiveIndexMaterial:
     def __init__(self, shelf, book, page, *,
                  db_path=None, auto_download=True,
                  update_database=False, ssl_certificate_location=None,
-                 # Legacy kwargs
-                 databasePath=None, **_ignored):
+                 # Legacy kwarg
+                 databasePath=None):
         # Support legacy kwarg
         if db_path is None and databasePath is not None:
             db_path = Path(databasePath)
