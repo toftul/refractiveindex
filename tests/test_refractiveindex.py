@@ -134,6 +134,11 @@ class TestErrorHandling(unittest.TestCase):
         with self.assertRaises(KeyError):
             ri.RefractiveIndexMaterial(shelf='main', book='Unobtainium', page='Fake')
 
+    def test_unknown_keyword_argument(self):
+        """TypeError for a misspelled keyword argument, instead of ignoring it."""
+        with self.assertRaises(TypeError):
+            ri.RefractiveIndexMaterial(shelf='main', book='SiO', page='Hass', dbpath='/nonexistent')
+
 
 class TestUnits(unittest.TestCase):
     """Tests for per-call unit= parameter on all public methods."""

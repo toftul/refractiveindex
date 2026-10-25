@@ -18,6 +18,9 @@ The version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.
 - `get_epsilon` now raises `ValueError` for an unknown `exp_type`.
   Before this fix, any value other than `'exp_minus_i_omega_t'` gave the `'exp_plus_i_omega_t'` result.
   A typo thus changed the sign of Im(ε) without an error.
+- `RefractiveIndexMaterial` now raises `TypeError` for an unknown keyword argument.
+  Before this fix, it ignored the argument. For example, `dbpath=...` used the default database without an error.
+  Releases before 1.0.0 also raised `TypeError`.
 
 ## [1.0.5] - 2026-10-26
 
