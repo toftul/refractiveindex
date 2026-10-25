@@ -1,6 +1,12 @@
 """Tests for the python interface to the RefractiveIndex database."""
 
+import contextlib
+import io
+import ssl
+import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
 
 import numpy as np
 
@@ -398,3 +404,79 @@ class TestDatabaseUpdates(unittest.TestCase):
         
         # Should not be empty
         self.assertGreater(len(hash_content), 0)
+
+
+# Self-signed CA certificate, used only as a trusted certificate file in TestDownloadSSL.
+_TEST_CA_PEM = """\
+-----BEGIN CERTIFICATE-----
+MIIBmzCCAUGgAwIBAgIUfqOC4nrFSgqHSdnuERKkPoaBKOYwCgYIKoZIzj0EAwIw
+IjEgMB4GA1UEAwwXcmVmcmFjdGl2ZWluZGV4IHRlc3QgQ0EwIBcNMjYxMDI1MjMy
+MDU5WhgPMjEyNjEwMDEyMzIwNTlaMCIxIDAeBgNVBAMMF3JlZnJhY3RpdmVpbmRl
+eCB0ZXN0IENBMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEuyRr4qPveLaxcjMX
+7kcvNVOdAbhLgkWs/MwYrDoKXomX2d4FUxDVpfCb+2LzdI3Gbqd6T8uUXVwlpwrz
+64ajBKNTMFEwHQYDVR0OBBYEFI38wKpH2PHhH/p1DkECd/vfyXXYMB8GA1UdIwQY
+MBaAFI38wKpH2PHhH/p1DkECd/vfyXXYMA8GA1UdEwEB/wQFMAMBAf8wCgYIKoZI
+zj0EAwIDSAAwRQIhAOdeOYsnhqrzYqv82ikwFmRC7EHo1Cj2n/cR1LTy9mjHAiAu
+qipjcWmndSvMuvxG0YjeLpv+rYgUiVbwW21AeDaKLw==
+-----END CERTIFICATE-----
+"""
+
+
+class TestDownloadSSL(unittest.TestCase):
+    """ssl_certificate_location applies to the download requests only. No network is used."""
+
+    def setUp(self):
+        self.default_https_context = ssl._create_default_https_context
+
+    def tearDown(self):
+        # The process-wide default must stay as it was.
+        self.assertIs(ssl._create_default_https_context, self.default_https_context)
+
+    def _urlopen_contexts(self, ssl_certificate_location):
+        """Run _download_database with a fake urlopen and return the SSL contexts it received."""
+        from refractiveindex.refractiveindex import _download_database
+        contexts = []
+
+        def fake_urlopen(url, *args, context=None, **kwargs):
+            contexts.append(context)
+            raise OSError("no network in this test")
+
+        with tempfile.TemporaryDirectory() as tempdir, \
+                mock.patch("urllib.request.urlopen", fake_urlopen), \
+                contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaises(OSError):
+                _download_database(Path(tempdir) / "db", ssl_certificate_location)
+        # One request for the latest commit hash, one for the database archive.
+        self.assertEqual(len(contexts), 2)
+        return contexts
+
+    def test_default(self):
+        """Without ssl_certificate_location, the requests use the system default."""
+        self.assertEqual(self._urlopen_contexts(None), [None, None])
+
+    def test_certificate_file(self):
+        """A .pem file is trusted for both requests."""
+        with tempfile.TemporaryDirectory() as tempdir:
+            pem = Path(tempdir) / "ca.pem"
+            pem.write_text(_TEST_CA_PEM)
+            contexts = self._urlopen_contexts(str(pem))
+        for context in contexts:
+            self.assertIsInstance(context, ssl.SSLContext)
+            self.assertEqual(context.verify_mode, ssl.CERT_REQUIRED)
+            subjects = [cert["subject"] for cert in context.get_ca_certs()]
+            self.assertEqual(subjects, [((("commonName", "refractiveindex test CA"),),)])
+
+    def test_unverified(self):
+        """An empty string turns off certificate checks for both requests."""
+        for context in self._urlopen_contexts(""):
+            self.assertIsInstance(context, ssl.SSLContext)
+            self.assertEqual(context.verify_mode, ssl.CERT_NONE)
+            self.assertFalse(context.check_hostname)
+
+    def test_missing_certificate_file(self):
+        """A path that is not an existing .pem file raises ValueError before any request."""
+        from refractiveindex.refractiveindex import _download_database
+        with mock.patch("urllib.request.urlopen") as fake_urlopen:
+            with self.assertRaises(ValueError):
+                _download_database(Path("unused"), "/nonexistent/ca.pem")
+        fake_urlopen.assert_not_called()
