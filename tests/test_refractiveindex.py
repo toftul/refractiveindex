@@ -356,6 +356,12 @@ class TestEpsilon(unittest.TestCase):
         self.assertAlmostEqual(eps_minus.real, eps_plus.real)
         self.assertAlmostEqual(eps_minus.imag, -eps_plus.imag)
 
+    def test_epsilon_invalid_exp_type(self):
+        """ValueError for an unknown exp_type, so a typo cannot flip the sign of Im(epsilon)."""
+        m = ri.RefractiveIndexMaterial(shelf='main', book='Ag', page='Johnson')
+        with self.assertRaises(ValueError):
+            m.get_epsilon(500, exp_type='exp_minus_iwt')
+
 
 class TestCatalogFixes(unittest.TestCase):
     """Tests for temporary fixes of upstream catalog errors (_CATALOG_FIXES)."""
