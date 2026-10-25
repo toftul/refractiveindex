@@ -21,7 +21,9 @@ Tests require network access on first run (downloads the database).
 Single-module library (`refractiveindex/refractiveindex.py`) with 1 public class + helper functions:
 
 - **`RefractiveIndexMaterial`** — Public API. Takes `shelf`, `book`, `page` identifiers to locate a material. All wavelengths are in **nanometers**. Stores `_n_func` and `_k_func` callables internally.
-- **`_load_catalog(db_path)`** — Parses `catalog-nk.yml` into a flat `(shelf, book, page) -> filepath` dict, cached at module level in `_catalog_cache`.
+- **`_read_catalog(db_path)`** — Parses `catalog-nk.yml` as is into a flat `(shelf, book, page) -> data path` dict.
+- **`_load_catalog(db_path)`** — Applies `_CATALOG_FIXES` to `_read_catalog` output and builds `(shelf, book, page) -> filepath`, cached at module level in `_catalog_cache`.
+- **`_CATALOG_FIXES`** — Temporary fixes for upstream catalog errors. Each applies only while upstream still has the bad path. `TestCatalogFixes.test_fixes_still_needed` fails once upstream is fixed; then remove the entry.
 - **`_ensure_database()` / `_download_database()`** — Downloads the database if missing. Pinned to a specific commit via `_DATABASE_SHA`.
 - **`_compute_formula(formula_id, coefficients, wl_um)`** — All 9 dispersion formulas (Sellmeier, Cauchy, Herzberger, Retro, Exotic, etc.) in one function.
 - **`_parse_tabulated(data_str)`** — Parses tabulated `n`, `k`, `nk` data from YAML.

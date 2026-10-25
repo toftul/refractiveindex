@@ -351,6 +351,33 @@ class TestEpsilon(unittest.TestCase):
         self.assertAlmostEqual(eps_minus.imag, -eps_plus.imag)
 
 
+class TestCatalogFixes(unittest.TestCase):
+    """Tests for temporary fixes of upstream catalog errors (_CATALOG_FIXES)."""
+
+    def test_synowicki_own_data(self):
+        """MgO and ZrO2 Synowicki give their own data, not As2S3's (issue #10)."""
+        n = {
+            book: ri.RefractiveIndexMaterial(shelf='main', book=book, page='Synowicki')
+            .get_refractive_index(633)
+            for book in ('As2S3', 'MgO', 'ZrO2')
+        }
+        self.assertAlmostEqual(n['As2S3'], 2.6008, places=3)
+        self.assertAlmostEqual(n['MgO'], 1.7257, places=3)
+        self.assertAlmostEqual(n['ZrO2'], 2.1406, places=3)
+
+    def test_fixes_still_needed(self):
+        """Fails once upstream fixes a catalog error, as a reminder to remove the fix."""
+        from refractiveindex.refractiveindex import _CATALOG_FIXES, _DEFAULT_DB_PATH, _read_catalog
+        ri.RefractiveIndexMaterial(shelf='main', book='SiO2', page='Malitson')  # ensure database
+        catalog = _read_catalog(_DEFAULT_DB_PATH)
+        for key, (bad_path, _) in _CATALOG_FIXES.items():
+            self.assertEqual(
+                catalog.get(key), bad_path,
+                f"Upstream catalog no longer has {bad_path!r} for {key}. "
+                f"Remove this entry from _CATALOG_FIXES in refractiveindex.py.",
+            )
+
+
 class TestDatabaseUpdates(unittest.TestCase):
     """Tests for database update functionality."""
 

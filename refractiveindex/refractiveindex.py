@@ -20,6 +20,17 @@ _DEFAULT_DB_PATH = Path.home() / ".refractiveindex.info-database"
 # Module-level cache: db_path -> {(shelf, book, page): filepath}
 _catalog_cache = {}
 
+# Temporary fixes for errors in the upstream catalog: (shelf, book, page) -> (bad_path, good_path).
+# A fix is applied only while the catalog still has bad_path, so it becomes a no-op once
+# upstream is fixed. TestCatalogFixes.test_fixes_still_needed then fails as a reminder
+# to remove the entry.
+_CATALOG_FIXES = {
+    # https://github.com/toftul/refractiveindex/issues/10
+    # Fixed upstream on develop (polyanskiy/refractiveindex.info-database@eb734f7a), not yet on main.
+    ("main", "MgO", "Synowicki"): ("main/As2S3/nk/Synowicki.yml", "main/MgO/nk/Synowicki.yml"),
+    ("main", "ZrO2", "Synowicki"): ("main/As2S3/nk/Synowicki.yml", "main/ZrO2/nk/Synowicki.yml"),
+}
+
 
 def _get_latest_commit_hash():
     """Get the latest commit hash from the main branch of the refractiveindex.info-database repository."""
@@ -116,16 +127,13 @@ def _check_for_updates(db_path, ssl_certificate_location=None):
         return False
 
 
-def _load_catalog(db_path):
-    key = str(db_path)
-    if key in _catalog_cache:
-        return _catalog_cache[key]
-
+def _read_catalog(db_path):
+    """Parse catalog-nk.yml as is into {(shelf, book, page): data path relative to data/}."""
     catalog_file = db_path / "catalog-nk.yml"
     with open(catalog_file, "rt", encoding="utf-8") as f:
         catalog = yaml.load(f, Loader=BaseLoader)
 
-    index = {}
+    entries = {}
     for shelf in catalog:
         if "DIVIDER" in shelf:
             continue
@@ -137,10 +145,21 @@ def _load_catalog(db_path):
             for page_entry in book_entry.get("content", []):
                 if "DIVIDER" in page_entry:
                     continue
-                page_name = page_entry["PAGE"]
-                data_rel = page_entry["data"]
-                filepath = db_path / "data" / Path(data_rel)
-                index[(shelf_name, book_name, page_name)] = filepath
+                entries[(shelf_name, book_name, page_entry["PAGE"])] = page_entry["data"]
+    return entries
+
+
+def _load_catalog(db_path):
+    key = str(db_path)
+    if key in _catalog_cache:
+        return _catalog_cache[key]
+
+    index = {}
+    for material_key, data_rel in _read_catalog(db_path).items():
+        fix = _CATALOG_FIXES.get(material_key)
+        if fix is not None and data_rel == fix[0]:
+            data_rel = fix[1]
+        index[material_key] = db_path / "data" / Path(data_rel)
 
     _catalog_cache[key] = index
     return index
