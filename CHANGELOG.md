@@ -4,6 +4,18 @@ This file lists the changes in each release of `refractiveindex`.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 The version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `ssl_certificate_location` with a path to a `.pem` file now works.
+  Before this fix, every HTTPS request in the process failed with `TypeError: 'SSLContext' object is not callable`.
+- `ssl_certificate_location` now applies only to the database download.
+  Before this fix, it changed the default for all HTTPS requests in the process.
+  With `ssl_certificate_location=""`, this turned off certificate checks for all of them.
+- The request for the latest database commit now uses `ssl_certificate_location` too.
+  Before this fix, this request ignored it, failed, and the library downloaded an older known commit.
+
 ## [1.0.5] - 2026-10-26
 
 ### Fixed

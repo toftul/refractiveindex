@@ -32,15 +32,35 @@ _CATALOG_FIXES = {
 }
 
 
-def _get_latest_commit_hash():
+def _make_ssl_context(ssl_certificate_location):
+    """Return the SSL context for the download requests, or None for the system default.
+
+    An empty string gives a context that does not verify certificates. A path to a .pem file
+    gives a context that trusts only that file. The context is passed to each request, so it
+    does not change the default for other HTTPS requests in the process.
+    """
+    import ssl
+
+    if ssl_certificate_location is None:
+        return None
+    if ssl_certificate_location == "":
+        return ssl._create_unverified_context()
+    if not ssl_certificate_location.endswith(".pem") or not Path(ssl_certificate_location).is_file():
+        raise ValueError(
+            f"Does not appear to be an existing .pem certificate file: {ssl_certificate_location}"
+        )
+    return ssl.create_default_context(cafile=ssl_certificate_location)
+
+
+def _get_latest_commit_hash(ssl_context=None):
     """Get the latest commit hash from the main branch of the refractiveindex.info-database repository."""
     try:
         # Use GitHub API to get the latest commit SHA
         import urllib.request
         import json
-        
+
         url = "https://api.github.com/repos/polyanskiy/refractiveindex.info-database/commits/main"
-        with urllib.request.urlopen(url) as response:
+        with urllib.request.urlopen(url, context=ssl_context) as response:
             data = json.loads(response.read().decode('utf-8'))
             return data['sha']
     except Exception as e:
@@ -50,34 +70,26 @@ def _get_latest_commit_hash():
 
 def _download_database(db_path, ssl_certificate_location=None, commit_hash=_DATABASE_SHA):
     import shutil
-    import ssl
     import tempfile
     import urllib.request
     import zipfile
 
+    ssl_context = _make_ssl_context(ssl_certificate_location)
+
     # Use provided commit hash or get the latest one
     if commit_hash is None:
-        commit_hash = _get_latest_commit_hash()
+        commit_hash = _get_latest_commit_hash(ssl_context)
         if commit_hash is None:
             # Fallback to a known good commit if we can't fetch the latest
             commit_hash = "ff11b5897ef0754b15d939d921eb6c745693cbd1"
-    
-    url = f"https://github.com/polyanskiy/refractiveindex.info-database/archive/{commit_hash}.zip"
 
-    if ssl_certificate_location is not None:
-        if ssl_certificate_location == "":
-            ssl._create_default_https_context = ssl._create_unverified_context
-        else:
-            if not ssl_certificate_location.endswith(".pem") or not Path(ssl_certificate_location).is_file():
-                raise ValueError(
-                    f"Does not appear to be an existing .pem certificate file: {ssl_certificate_location}"
-                )
-            ssl._create_default_https_context = ssl.create_default_context(cafile=ssl_certificate_location)
+    url = f"https://github.com/polyanskiy/refractiveindex.info-database/archive/{commit_hash}.zip"
 
     with tempfile.TemporaryDirectory() as tempdir:
         zip_path = Path(tempdir) / "db.zip"
         print("downloading refractiveindex.info database...", file=sys.stderr)
-        urllib.request.urlretrieve(url, zip_path)
+        with urllib.request.urlopen(url, context=ssl_context) as response, open(zip_path, "wb") as f:
+            shutil.copyfileobj(response, f)
         print("extracting...", file=sys.stderr)
         with zipfile.ZipFile(zip_path, "r") as zf:
             zf.extractall(tempdir)
@@ -115,7 +127,7 @@ def _check_for_updates(db_path, ssl_certificate_location=None):
             current_hash = None
         
         # Get the latest commit hash
-        latest_hash = _get_latest_commit_hash()
+        latest_hash = _get_latest_commit_hash(_make_ssl_context(ssl_certificate_location))
         
         if latest_hash and (current_hash is None or current_hash != latest_hash):
             print(f"Updating database from {current_hash or 'unknown'} to {latest_hash}", file=sys.stderr)
