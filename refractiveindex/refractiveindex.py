@@ -452,6 +452,10 @@ class RefractiveIndexMaterial:
         Note:
             If the material has no extinction coefficient data, k is taken as 0.
         """
+        if exp_type not in ("exp_minus_i_omega_t", "exp_plus_i_omega_t"):
+            raise ValueError(
+                f"exp_type must be 'exp_minus_i_omega_t' or 'exp_plus_i_omega_t', got {exp_type!r}"
+            )
         n = self.get_refractive_index(wavelength, unit=unit)
         if self._k_func is None:
             k = 0.0
@@ -459,8 +463,7 @@ class RefractiveIndexMaterial:
             k = self.get_extinction_coefficient(wavelength, unit=unit)
         if exp_type == "exp_minus_i_omega_t":
             return (n + 1j * k) ** 2
-        else:
-            return (n - 1j * k) ** 2
+        return (n - 1j * k) ** 2
 
     def get_wl_range(self, unit="nm"):
         """Return the valid range as (min, max) in the requested unit, or None if unknown.

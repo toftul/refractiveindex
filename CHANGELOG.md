@@ -15,6 +15,9 @@ The version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.
   With `ssl_certificate_location=""`, this turned off certificate checks for all of them.
 - The request for the latest database commit now uses `ssl_certificate_location` too.
   Before this fix, this request ignored it, failed, and the library downloaded an older known commit.
+- `get_epsilon` now raises `ValueError` for an unknown `exp_type`.
+  Before this fix, any value other than `'exp_minus_i_omega_t'` gave the `'exp_plus_i_omega_t'` result.
+  A typo thus changed the sign of Im(ε) without an error.
 
 ## [1.0.5] - 2026-10-26
 
