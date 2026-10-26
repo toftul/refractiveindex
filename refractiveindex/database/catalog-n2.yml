@@ -1,0 +1,1066 @@
+# this file is part of refractiveindex.info database
+# refractiveindex.info database is in the public domain
+# copyright and related rights waived via CC0 1.0
+
+- DIVIDER: "Research data"
+- SHELF: main
+  name: "MAIN - simple inorganic materials"
+  content:
+    - DIVIDER: "Al - Aluminates"
+    - BOOK: BeAl2O4
+      name: "BeAl<sub>2</sub>O<sub>4</sub> (Beryllium aluminate, chrysoberyl)"
+      content:
+        - PAGE: Adair
+          name: "Adair 1989"
+          data: main/BeAl2O4/n2/Adair.yml
+    - BOOK: MgAl2O4
+      name: "MgAl<sub>2</sub>O<sub>4</sub> (Magnesium aluminate, spinel)"
+      content:
+        - PAGE: Flom
+          name: "Flom et al. 2015"
+          data: main/MgAl2O4/n2/Flom.yml
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/MgAl2O4/n2/Adair.yml
+    - BOOK: YAlO3
+      name: "YAlO<sub>3</sub> (Yttrium orthoaluminate, YAP)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/YAlO3/n2/Adair.yml
+    - DIVIDER: "Ar - Argon"
+    - BOOK: Ar
+      name: "Ar (Argon)"
+      content:
+        - PAGE: Geints-5bar
+          name: "Geints et al. 2025: 5 bar"
+          data: main/Ar/n2/Geints-5bar.yml
+        - PAGE: Geints-11bar
+          name: "Geints et al. 2025: 11 bar"
+          data: main/Ar/n2/Geints-11bar.yml
+        - PAGE: Zahedpour
+          name: "Zahedpour et al. 2015"
+          data: main/Ar/n2/Zahedpour.yml
+        - PAGE: Wahlstrand
+          name: "Wahlstrand et al. 2012"
+          data: main/Ar/n2/Wahlstrand.yml
+        - PAGE: Nibbering
+          name: "Nibbering et al. 1997"
+          data: main/Ar/n2/Nibbering.yml
+        - PAGE: Shaw
+          name: "Shaw et al. 1993"
+          data: main/Ar/n2/Shaw.yml
+    - DIVIDER: "As - Arsenides and arsenates"
+    - BOOK: GaAs
+      name: "GaAs (Gallium arsenide)"
+      content:
+        - PAGE: Matteo-220fs
+          name: "Matteo et al. 2024; 220 fs"
+          data: main/GaAs/n2/Matteo-220fs.yml
+        - PAGE: Matteo-200ps
+          name: "Matteo et al. 2024; 200 ps"
+          data: main/GaAs/n2/Matteo-200ps.yml
+        - PAGE: Polyanskiy
+          name: "Polyanskiy et al. 2024"
+          data: main/GaAs/n2/Polyanskiy.yml
+        - PAGE: Jansonas
+          name: "Jansonas et al. 2022"
+          data: main/GaAs/n2/Jansonas.yml
+        - PAGE: Ensley
+          name: "Ensley and Bambha 2019"
+          data: main/GaAs/n2/Ensley.yml
+        - PAGE: Hurlbut
+          name: "Hurlbut et al. 2007"
+          data: main/GaAs/n2/Hurlbut.yml
+        - PAGE: Tatsuura
+          name: "Tatsuura et al. 2005"
+          data: main/GaAs/n2/Tatsuura.yml
+        - PAGE: Sheik-Bahae
+          name: "Sheik-Bahae et al. 1991"
+          data: main/GaAs/n2/Sheik-Bahae.yml
+    - BOOK: KTiOAsO4
+      name: "KTiOAsO<sub>4</sub> (Potassium titanyl arsenate, KTA)"
+      content:
+        - PAGE: Jansonas-XZ
+          name: "Jansonas et al. 2022: E∥XZ"
+          data: main/KTiOAsO4/n2/Jansonas-XZ.yml
+        - PAGE: Jansonas-Y
+          name: "Jansonas et al. 2022: E∥Y (β)"
+          data: main/KTiOAsO4/n2/Jansonas-Y.yml
+    - DIVIDER: "B - Borates"
+    - BOOK: BiB3O6
+      name: "BiB<sub>3</sub>O<sub>6</sub> (Bismuth triborate, BiBO)"
+      content:
+        - PAGE: Kabacinski
+          name: "Kabaciński et al. 2019: E∥X (α)"
+          data: main/BiB3O6/n2/Kabacinski.yml
+        - PAGE: Miller-αY
+          name: "Miller et al. 2008: E∥X (α); propagation ∥ Y"
+          data: main/BiB3O6/n2/Miller-alphaY.yml
+        - PAGE: Miller-αZ
+          name: "Miller et al. 2008: E∥Z (α); propagation ∥ Z"
+          data: main/BiB3O6/n2/Miller-alphaZ.yml
+        - PAGE: Miller-βX
+          name: "Miller et al. 2008: E∥Y (β); propagation ∥ X"
+          data: main/BiB3O6/n2/Miller-betaX.yml
+        - PAGE: Miller-γX
+          name: "Miller et al. 2008: E∥Z (γ); propagation ∥ X"
+          data: main/BiB3O6/n2/Miller-gammaX.yml
+        - PAGE: Miller-γY
+          name: "Miller et al. 2008: E∥Z (γ); propagation ∥ Y"
+          data: main/BiB3O6/n2/Miller-gammaY.yml
+    - DIVIDER: "B - Borates"
+    - BOOK: BaB2O4
+      name: "BaB<sub>2</sub>O<sub>4</sub> (Barium borate, BBO)"
+      content:
+        - PAGE: DeSalvo
+          name: "DeSalvo et al. 1996"
+          data: main/BaB2O4/n2/DeSalvo.yml
+    - DIVIDER: "Br - Bromides"
+    - BOOK: AgBr
+      name: "AgBr (Silver bromide)"
+      content:
+        - PAGE: Polyanskiy
+          name: "Polyanskiy et al. 2024"
+          data: main/AgBr/n2/Polyanskiy.yml
+    - BOOK: KBr
+      name: "KBr (Potassium bromide)"
+      content:
+        - PAGE: VanderLinden
+          name: "VanderLinden et al. 2025"
+          data: main/KBr/n2/VanderLinden.yml
+        - PAGE: Polyanskiy
+          name: "Polyanskiy et al. 2024"
+          data: main/KBr/n2/Polyanskiy.yml
+        - PAGE: DeSalvo
+          name: "DeSalvo et al. 1996"
+          data: main/KBr/n2/DeSalvo.yml
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/KBr/n2/Adair.yml
+    - BOOK: NaBr
+      name: "NaBr (Sodium bromide)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/NaBr/n2/Adair.yml
+    - DIVIDER: "C - Carbonates"
+    - BOOK: CaCO3
+      name: "CaCO<sub>3</sub> (Calcium carbonate, Calcite)"
+      content:
+        - PAGE: Kabacinski-o
+          name: "Kabaciński et al. 2019: (o)"
+          data: main/CaCO3/n2/Kabacinski-o.yml
+        - PAGE: Kabacinski-e
+          name: "Kabaciński et al. 2019: (e)"
+          data: main/CaCO3/n2/Kabacinski-e.yml
+        - PAGE: DeSalvo
+          name: "DeSalvo et al. 1996: (e)"
+          data: main/CaCO3/n2/DeSalvo.yml
+        - PAGE: Adair-o
+          name: "Adair et al. 1989: (o)"
+          data: main/CaCO3/n2/Adair-o.yml
+        - PAGE: Adair-e
+          name: "Adair et al. 1989: (e)"
+          data: main/CaCO3/n2/Adair-e.yml
+    - DIVIDER: "Cl - Chlorides"
+    - BOOK: AgCl
+      name: "AgCl (Silver chloride)"
+      content:
+        - PAGE: Polyanskiy
+          name: "Polyanskiy et al. 2024"
+          data: main/AgCl/n2/Polyanskiy.yml
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/AgCl/n2/Adair.yml
+    - BOOK: KCl
+      name: "KCl (Potassium chloride)"
+      content:
+        - PAGE: Polyanskiy
+          name: "Polyanskiy et al. 2021"
+          data: main/KCl/n2/Polyanskiy.yml
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/KCl/n2/Adair.yml
+    - BOOK: NaCl
+      name: "NaCl (Sodium chloride)"
+      content:
+        - PAGE: Polyanskiy
+          name: "Polyanskiy et al. 2021"
+          data: main/NaCl/n2/Polyanskiy.yml
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/NaCl/n2/Adair.yml
+    - DIVIDER: "F - Fluorides"
+    - BOOK: BaF2
+      name: "BaF<sub>2</sub> (Barium fluoride)"
+      content:
+        - PAGE: Polyanskiy
+          name: "Polyanskiy et al. 2021"
+          data: main/BaF2/n2/Polyanskiy.yml
+        - PAGE: Ensley
+          name: "Ensley and Bambha 2019"
+          data: main/BaF2/n2/Ensley.yml
+        - PAGE: DeSalvo
+          name: "DeSalvo et al. 1996"
+          data: main/BaF2/n2/DeSalvo.yml
+        - PAGE: Sheik-Bahae
+          name: "Sheik-Bahae et al. 1991"
+          data: main/BaF2/n2/Sheik-Bahae.yml
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/BaF2/n2/Adair.yml
+        - PAGE: Milam
+          name: "Milam et al. 1977"
+          data: main/BaF2/n2/Milam.yml
+    - BOOK: CaF2
+      name: "CaF<sub>2</sub> (Calcium fluoride)"
+      content:
+        - PAGE: VanderLinden
+          name: "VanderLinden et al. 2025"
+          data: main/CaF2/n2/VanderLinden.yml
+        - PAGE: Patwardhan
+          name: "Patwardhan et al. 2021"
+          data: main/CaF2/n2/Patwardhan.yml
+        - PAGE: Ensley
+          name: "Ensley and Bambha 2019"
+          data: main/CaF2/n2/Ensley.yml
+        - PAGE: Kabacinski
+          name: "Kabaciński et al. 2019"
+          data: main/CaF2/n2/Kabacinski.yml
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/CaF2/n2/Adair.yml
+        - PAGE: Milam
+          name: "Milam et al. 1977"
+          data: main/CaF2/n2/Milam.yml
+    - BOOK: CdF2
+      name: "CdF<sub>2</sub> (Cadmium fluoride)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/CdF2/n2/Adair.yml
+        - PAGE: Milam
+          name: "Milam et al. 1977"
+          data: main/CdF2/n2/Milam.yml
+    - BOOK: CeF3
+      name: "CeF<sub>3</sub> (Cerium trifluoride)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989: (o)"
+          data: main/CeF3/n2/Adair.yml
+        - PAGE: Milam
+          name: "Milam et al. 1977"
+          data: main/CeF3/n2/Milam.yml
+    - BOOK: KF
+      name: "KF (Potassium fluoride)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/KF/n2/Adair.yml
+    - BOOK: LaF3
+      name: "LaF<sub>3</sub> (Lanthanum fluoride)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989: (o)"
+          data: main/LaF3/n2/Adair.yml
+        - PAGE: Milam
+          name: "Milam et al. 1977: (o)"
+          data: main/LaF3/n2/Milam.yml
+    - BOOK: LiF
+      name: "LiF (Lithium fluoride)"
+      content:
+        - PAGE: Ensley
+          name: "Ensley and Bambha 2019"
+          data: main/LiF/n2/Ensley.yml
+        - PAGE: DeSalvo
+          name: "DeSalvo et al. 1996"
+          data: main/LiF/n2/DeSalvo.yml
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/LiF/n2/Adair.yml
+        - PAGE: Milam
+          name: "Milam et al. 1977"
+          data: main/LiF/n2/Milam.yml
+    - BOOK: MgF2
+      name: "MgF<sub>2</sub> (Magnesium fluoride)"
+      content:
+        - PAGE: Ensley
+          name: "Ensley and Bambha 2019"
+          data: main/MgF2/n2/Ensley.yml
+        - PAGE: Patwardhan
+          name: "Patwardhan et al. 2021"
+          data: main/MgF2/n2/Patwardhan.yml
+        - PAGE: DeSalvo
+          name: "DeSalvo et al. 1996"
+          data: main/MgF2/n2/DeSalvo.yml
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/MgF2/n2/Adair.yml
+        - PAGE: Milam
+          name: "Milam et al. 1977"
+          data: main/MgF2/n2/Milam.yml
+    - BOOK: NaF
+      name: "NaF (Sodium fluoride)"
+      content:
+        - PAGE: Polyanskiy
+          name: "Polyanskiy et al. 2024"
+          data: main/NaF/n2/Polyanskiy.yml
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/NaF/n2/Adair.yml
+        - PAGE: Milam
+          name: "Milam et al. 1977"
+          data: main/NaF/n2/Milam.yml
+    - BOOK: PbF2
+      name: "PbF<sub>2</sub> (Lead difluoride)"
+      content:
+        - PAGE: Milam
+          name: "Milam et al. 1977"
+          data: main/PbF2/n2/Milam.yml
+    - BOOK: SF6
+      name: "SF<sub>6</sub> (Sulphur hexafluoride)"
+      content:
+        - PAGE: Nibbering
+          name: "Nibbering et al. 1997"
+          data: main/SF6/n2/Nibbering.yml
+    - BOOK: SrF2
+      name: "SrF<sub>2</sub> (Strontium fluoride)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/SrF2/n2/Adair.yml
+        - PAGE: Milam
+          name: "Milam et al. 1977"
+          data: main/SrF2/n2/Milam.yml
+    - BOOK: YLiF4
+      name: "YLiF<sub>4</sub> (Yttrium lithium fluoride, YLF)"
+      content:
+        - PAGE: Milam
+          name: "Milam et al. 1977: (o)"
+          data: main/YLiF4/n2/Milam.yml
+    - DIVIDER: "Ge - Germanium"
+    - BOOK: Ge
+      name: "Ge (Germanium)"
+      content:
+        - PAGE: Matteo-220fs
+          name: "Matteo et al. 2024; 220 fs"
+          data: main/Ge/n2/Matteo-220fs.yml
+        - PAGE: Matteo-200ps
+          name: "Matteo et al. 2024; 200 ps"
+          data: main/Ge/n2/Matteo-200ps.yml
+        - PAGE: Polyanskiy
+          name: "Polyanskiy et al. 2024"
+          data: main/Ge/n2/Polyanskiy.yml
+        - PAGE: Ensley
+          name: "Ensley and Bambha 2019"
+          data: main/Ge/n2/Ensley.yml
+        - PAGE: Sheik-Bahae
+          name: "Sheik-Bahae et al. 1991"
+          data: main/Ge/n2/Sheik-Bahae.yml
+    - DIVIDER: "He - Helium"
+    - BOOK: He
+      name: "He (Helium)"
+      content:
+        - PAGE: Shaw
+          name: "Shaw et al. 1993"
+          data: main/He/n2/Shaw.yml
+    - DIVIDER: "I - Iodides"
+    - BOOK: CsI
+      name: "CsI (Cesium iodide)"
+      content:
+        - PAGE: Polyanskiy
+          name: "Polyanskiy et al. 2024"
+          data: main/CsI/n2/Polyanskiy.yml
+    - DIVIDER: "N - Nitrogen"
+    - BOOK: N2
+      name: "N<sub>2</sub> (Nitrogen)"
+      content:
+        - PAGE: Geints-5bar-50fs
+          name: "Geints et al. 2025: Short pulse -5 bar"
+          data: main/N2/n2/Geints-5bar-50fs.yml
+        - PAGE: Geints-11bar-50fs
+          name: "Geints et al. 2025: Short pulse -11 bar"
+          data: main/N2/n2/Geints-11bar-50fs.yml
+        - PAGE: Geints-1bar-500fs
+          name: "Geints et al. 2025: Long pulse -1 bar"
+          data: main/N2/n2/Geints-1bar-500fs.yml
+        - PAGE: Geints-5bar-500fs
+          name: "Geints et al. 2025: Long pulse -5 bar"
+          data: main/N2/n2/Geints-5bar-500fs.yml
+        - PAGE: Geints-11bar-500fs
+          name: "Geints et al. 2025: Long pulse -11 bar"
+          data: main/N2/n2/Geints-11bar-500fs.yml
+        - PAGE: Pigeon
+          name: "Pigeon et al. 2016"
+          data: main/N2/n2/Pigeon.yml
+        - PAGE: Zahedpour
+          name: "Zahedpour et al. 2015"
+          data: main/N2/n2/Zahedpour.yml
+        - PAGE: Wahlstrand
+          name: "Wahlstrand et al. 2012"
+          data: main/N2/n2/Wahlstrand.yml
+        - PAGE: Nibbering
+          name: "Nibbering et al. 1997"
+          data: main/N2/n2/Nibbering.yml
+        - PAGE: Shaw
+          name: "Shaw et al. 1993"
+          data: main/N2/n2/Shaw.yml
+    - DIVIDER: "Nb - Niobates"
+    - BOOK: LiNbO3
+      name: "LiNbO<sub>3</sub> (Lithium niobate)"
+      content:
+        - PAGE: DeSalvo
+          name: "DeSalvo et al. 1996: (e)"
+          data: main/LiNbO3/n2/DeSalvo.yml
+    - DIVIDER: "Ne - Neon"
+    - BOOK: Ne
+      name: "Ne (Neon)"
+      content:
+        - PAGE: Shaw
+          name: "Shaw et al. 1993"
+          data: main/Ne/n2/Shaw.yml
+    - DIVIDER: "O - Oxygen, oxides and garnets"
+    - BOOK: O2
+      name: "O<sub>2</sub> (Oxygen)"
+      content:
+        - PAGE: Pigeon
+          name: "Pigeon et al. 2016"
+          data: main/O2/n2/Pigeon.yml
+        - PAGE: Zahedpour
+          name: "Zahedpour et al. 2015"
+          data: main/O2/n2/Zahedpour.yml
+        - PAGE: Wahlstrand
+          name: "Wahlstrand et al. 2012"
+          data: main/O2/n2/Wahlstrand.yml
+        - PAGE: Nibbering
+          name: "Nibbering et al. 1997"
+          data: main/O2/n2/Nibbering.yml
+        - PAGE: Shaw
+          name: "Shaw et al. 1993"
+          data: main/O2/n2/Shaw.yml
+    - BOOK: Al2O3
+      name: "Al<sub>2</sub>O<sub>3</sub> (Aluminium sesquioxide, Sapphire, Alumina)"
+      content:
+        - PAGE: Patwardhan
+          name: "Patwardhan et al. 2021"
+          data: main/Al2O3/n2/Patwardhan.yml
+        - PAGE: DeSalvo
+          name: "DeSalvo et al. 1996: (e)"
+          data: main/Al2O3/n2/DeSalvo.yml
+        - PAGE: Adair-o
+          name: "Adair et al. 1989: (o)"
+          data: main/Al2O3/n2/Adair-o.yml
+        - PAGE: Adair-e
+          name: "Adair et al. 1989: (e)"
+          data: main/Al2O3/n2/Adair-e.yml
+    - BOOK: CO2
+      name: "CO<sub>2</sub> (Carbon dioxide)"
+      content:
+        - PAGE: Geints-1bar-50fs
+          name: "Geints et al. 2025: Short pulse -1 bar"
+          data: main/CO2/n2/Geints-1bar-50fs.yml
+        - PAGE: Geints-5bar-50fs
+          name: "Geints et al. 2025: Short pulse -5 bar"
+          data: main/CO2/n2/Geints-5bar-50fs.yml
+        - PAGE: Geints-11bar-50fs
+          name: "Geints et al. 2025: Short pulse -11 bar"
+          data: main/CO2/n2/Geints-11bar-50fs.yml
+        - PAGE: Geints-1bar-500fs
+          name: "Geints et al. 2025: Long pulse -1 bar"
+          data: main/CO2/n2/Geints-1bar-500fs.yml
+        - PAGE: Geints-5bar-500fs
+          name: "Geints et al. 2025: Long pulse -5 bar"
+          data: main/CO2/n2/Geints-5bar-500fs.yml
+        - PAGE: Geints-11bar-500fs
+          name: "Geints et al. 2025: Long pulse -11 bar"
+          data: main/CO2/n2/Geints-11bar-500fs.yml
+        - PAGE: Mareev
+          name: "Mareev et al. 2018"
+          data: main/CO2/n2/Mareev.yml
+    - BOOK: CaO
+      name: "CaO (Calcium oxide)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/CaO/n2/Adair.yml
+    - BOOK: Er2O3
+      name: "Er<sub>2</sub>O<sub>3</sub> (Erbium oxide)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/Er2O3/n2/Adair.yml
+    - BOOK: Ga2O3
+      name: "Ga<sub>2</sub>O<sub>3</sub> (Gallium oxide)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/Ga2O3/n2/Adair.yml
+    - BOOK: Gd3Sc2Al3O12
+      name: "Gd<sub>3</sub>Sc<sub>2</sub>Al<sub>3</sub>O<sub>12</sub> (Gadolinium scandium aluminium garnet, GSAG)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/Gd3Sc2Al3O12/n2/Adair.yml
+    - BOOK: Gd3Ga5O12
+      name: "Gd<sub>3</sub>Ga<sub>5</sub>O<sub>12</sub> (Gadolinium gallium garnet, GGG)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/Gd3Ga5O12/n2/Adair.yml
+    - BOOK: Gd3Sc2Ga3O12
+      name: "Gd<sub>3</sub>Sc<sub>2</sub>Ga<sub>3</sub>O<sub>12</sub> (Gadolinium scandium gallium garnet, GSGG)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/Gd3Sc2Ga3O12/n2/Adair.yml
+    - BOOK: La3Lu2Ga3O12
+      name: "La<sub>3</sub>Lu<sub>2</sub>Ga<sub>3</sub>O<sub>12</sub> (Lanthanum lutetium gallium garnet, LLGG)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/La3Lu2Ga3O12/n2/Adair.yml          
+    - BOOK: MgO
+      name: "MgO (Magnesium monoxide)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/MgO/n2/Adair.yml
+    - BOOK: N2O
+      name: "N<sub>2</sub>O (Nitrous oxide)"
+      content:
+        - PAGE: Wahlstrand
+          name: "Wahlstrand et al. 2012"
+          data: main/N2O/n2/Wahlstrand.yml
+    - BOOK: SiO2
+      name: "SiO<sub>2</sub> (Silicon dioxide, Silica, Quartz)"
+      content:
+        - DIVIDER: "Fused silica"
+        - PAGE: VanderLinden
+          name: "VanderLinden et al. 2025"
+          data: main/SiO2/n2/VanderLinden.yml
+        - PAGE: Jansonas
+          name: "Jansonas et al. 2022"
+          data: main/SiO2/n2/Jansonas.yml
+        - PAGE: Patwardhan
+          name: "Patwardhan et al. 2021"
+          data: main/SiO2/n2/Patwardhan.yml
+        - PAGE: Kabacinski
+          name: "Kabaciński et al. 2019"
+          data: main/SiO2/n2/Kabacinski.yml
+        - PAGE: Ensley
+          name: "Ensley and Bambha 2019"
+          data: main/SiO2/n2/Ensley.yml
+        - PAGE: Flom
+          name: "Flom et al. 2015"
+          data: main/SiO2/n2/Flom.yml
+        - PAGE: Milam
+          name: "Milam 1998"
+          data: main/SiO2/n2/Milam.yml
+        - PAGE: DeSalvo
+          name: "DeSalvo et al. 1996"
+          data: main/SiO2/n2/DeSalvo.yml
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/SiO2/n2/Adair.yml
+        - PAGE: White
+          name: "White et al. 1984"
+          data: main/SiO2/n2/White.yml
+        - DIVIDER: "Crystal"
+        - PAGE: Adair-o
+          name: "Adair et al. 1989: (o)"
+          data: main/SiO2/n2/Adair-o.yml
+        - PAGE: Adair-e
+          name: "Adair et al. 1989: (e)"
+          data: main/SiO2/n2/Adair-e.yml
+    - BOOK: SrO
+      name: "SrO (Strontium oxide)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/SrO/n2/Adair.yml
+    - BOOK: TiO2
+      name: "TiO<sub>2</sub> (Titanium dioxide)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/TiO2/n2/Adair.yml
+    - BOOK: Y2O3
+      name: "Y<sub>2</sub>O<sub>3</sub> (Yttrium sesquioxide)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/Y2O3/n2/Adair.yml
+    - BOOK: Y3Al5O12
+      name: "Y<sub>3</sub>Al<sub>5</sub>O<sub>12</sub> (Yttrium aluminium garnet, YAG)"
+      content:
+        - PAGE: Kabacinski
+          name: "Kabaciński et al. 2019"
+          data: main/Y3Al5O12/n2/Kabacinski.yml
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/Y3Al5O12/n2/Adair.yml
+        - PAGE: Bliss
+          name: "Bliss et al. 1974"
+          data: main/Y3Al5O12/n2/Bliss.yml
+        - PAGE: Owyoung
+          name: "Owyoung 1973"
+          data: main/Y3Al5O12/n2/Owyoung.yml
+    - BOOK: Y3Ga5O12
+      name: "Y<sub>3</sub>Ga<sub>5</sub>O<sub>12</sub> (Yttrium gallium garnet, YGG)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/Y3Ga5O12/n2/Adair.yml
+    - BOOK: ZnO
+      name: "ZnO (Zinc monoxide)"
+      content:
+        - PAGE: Adair-o
+          name: "Adair et al. 1989: (o)"
+          data: main/ZnO/n2/Adair-o.yml
+        - PAGE: Adair-e
+          name: "Adair et al. 1989: (e)"
+          data: main/ZnO/n2/Adair-e.yml
+    - BOOK: ZrO2
+      name: "ZrO<sub>2</sub> (Zirconium dioxide, Zirconia)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/ZrO2/n2/Adair.yml
+    - DIVIDER: "P - Phosphides and phosphates"
+    - BOOK: InP
+      name: "InP (Indium phosphide)"
+      content:
+        - PAGE: Ensley
+          name: "Ensley and Bambha 2019"
+          data: main/InP/n2/Ensley.yml
+    - BOOK: KH2PO4
+      name: "KH<sub>2</sub>PO<sub>4</sub> (Potassium dihydrogen phosphate, KDP)"
+      content:
+        - PAGE: Adair-o
+          name: "Adair et al. 1989: (o)"
+          data: main/KH2PO4/n2/Adair-o.yml
+        - PAGE: Adair-e
+          name: "Adair et al. 1989: (e)"
+          data: main/KH2PO4/n2/Adair-e.yml
+    - BOOK: KTiOPO4
+      name: "KTiOPO<sub>4</sub> (Potassium titanyl phosphate, KTP)"
+      content:
+        - PAGE: DeSalvo
+          name: "DeSalvo et al. 1996: E∥Y (β)"
+          data: main/KTiOPO4/n2/DeSalvo-beta.yml
+        - PAGE: DeSalvo
+          name: "DeSalvo et al. 1996: E∥Z (γ)"
+          data: main/KTiOPO4/n2/DeSalvo-gamma.yml
+        - PAGE: Sheik-Bahae
+          name: "Sheik-Bahae et al. 1991"
+          data: main/KTiOPO4/n2/Sheik-Bahae.yml
+    - BOOK: ZnGeP2
+      name: "ZnGeP<sub>2</sub> (Zinc germanium phosphide, ZGP)"
+      content:
+        - PAGE: Jansonas-o
+          name: "Jansonas et al. 2022: (o)"
+          data: main/ZnGeP2/n2/Jansonas-o.yml
+        - PAGE: Jansonas-e
+          name: "Jansonas et al. 2022: (e)"
+          data: main/ZnGeP2/n2/Jansonas-e.yml
+    - DIVIDER: "S - Sulfides and sulfates"
+    - BOOK: AgGaS2
+      name: "AgGaS<sub>2</sub> (Silver gallium sulfide, AGS)"
+      content:
+        - PAGE: Jansonas-o
+          name: "Jansonas et al. 2022: (o)"
+          data: main/AgGaS2/n2/Jansonas-o.yml
+        - PAGE: Jansonas-e
+          name: "Jansonas et al. 2022: (e)"
+          data: main/AgGaS2/n2/Jansonas-e.yml
+    - BOOK: CS2
+      name: "CS<sub>2</sub> (Carbon disulfide)"
+      content:
+        - PAGE: Sheik-Bahae
+          name: "Sheik-Bahae et al. 1991"
+          data: main/CS2/n2/Sheik-Bahae.yml
+    - BOOK: CdS
+      name: "CdS (Cadmium sulfide)"
+      content:
+        - PAGE: Sheik-Bahae
+          name: "Sheik-Bahae et al. 1991"
+          data: main/CdS/n2/Sheik-Bahae.yml
+        - PAGE: Adair-o
+          name: "Adair et al. 1989: (o)"
+          data: main/CdS/n2/Adair-o.yml
+        - PAGE: Adair-e
+          name: "Adair et al. 1989: (e)"
+          data: main/CdS/n2/Adair-e.yml
+    - BOOK: LiGaS2
+      name: "LiGaS<sub>2</sub> (Lithium gallium sulfide, LGS)"
+      content:
+        - PAGE: Jansonas-XZ
+          name: "Jansonas et al. 2022: E∥XZ"
+          data: main/LiGaS2/n2/Jansonas-XZ.yml
+        - PAGE: Jansonas-Y
+          name: "Jansonas et al. 2022: E∥Y (β)"
+          data: main/LiGaS2/n2/Jansonas-Y.yml
+    - BOOK: ZnS
+      name: "ZnS (Zinc sulfide)"
+      content:
+        - DIVIDER: "Crystal"
+        - PAGE: Adair-o
+          name: "Adair et al. 1989: (o)"
+          data: main/ZnS/n2/Adair-o.yml
+        - PAGE: Adair-e
+          name: "Adair et al. 1989: (e)"
+          data: main/ZnS/n2/Adair-e.yml
+        - DIVIDER: "Polycrystalline"
+        - PAGE: Polyanskiy
+          name: "Polyanskiy et al. 2024"
+          data: main/ZnS/n2/Polyanskiy.yml
+        - PAGE: Jansonas
+          name: "Jansonas et al. 2022"
+          data: main/ZnS/n2/Jansonas.yml
+        - PAGE: Patwardhan
+          name: "Patwardhan et al. 2021"
+          data: main/ZnS/n2/Patwardhan.yml
+        - PAGE: Ensley
+          name: "Ensley and Bambha 2019"
+          data: main/ZnS/n2/Ensley.yml
+        - PAGE: Flom
+          name: "Flom et al. 2015"
+          data: main/ZnS/n2/Flom.yml
+    - DIVIDER: "Sb - Antimonides"
+    - BOOK: GaSb
+      name: "GaSb (Gallium antimonide)"
+      content:
+        - PAGE: Ensley
+          name: "Ensley and Bambha 2019"
+          data: main/GaSb/n2/Ensley.yml
+    - DIVIDER: "Se - Selenides"
+    - BOOK: AgGaSe2
+      name: "AgGaSe<sub>2</sub> (Silver gallium selenide, AGSe)"
+      content:
+        - PAGE: Pigeon
+          name: "Pigeon et al. 2020"
+          data: main/AgGaSe2/n2/Pigeon.yml
+    - BOOK: BaGa4Se7
+      name: "BaGa<sub>4</sub>Se<sub>7</sub> (Barium gallium selenide, BGSe)"
+      content:
+        - PAGE: Jansonas
+          name: "Jansonas et al. 2022"
+          data: main/BaGa4Se7/n2/Jansonas.yml
+    - BOOK: CdSe
+      name: "CdSe (Cadmium selenide)"
+      content:
+        - PAGE: Sheik-Bahae
+          name: "Sheik-Bahae et al. 1991"
+          data: main/CdSe/n2/Sheik-Bahae.yml
+    - BOOK: GaSe
+      name: "GaSe (Gallium selenide)"
+      content:
+        - PAGE: Jansonas-o
+          name: "Jansonas et al. 2022: (o)"
+          data: main/GaSe/n2/Jansonas.yml
+        - PAGE: Pigeon
+          name: "Pigeon et al. 2020"
+          data: main/GaSe/n2/Pigeon.yml
+    - BOOK: ZnSe
+      name: "ZnSe (Zinc selenide)"
+      content:
+        - DIVIDER: "Polycrystalline"
+        - PAGE: Matteo-220fs
+          name: "Matteo et al. 2024; 220 fs"
+          data: main/ZnSe/n2/Matteo-220fs.yml
+        - PAGE: Matteo-200ps
+          name: "Matteo et al. 2024; 200 ps"
+          data: main/ZnSe/n2/Matteo-200ps.yml
+        - PAGE: Polyanskiy
+          name: "Polyanskiy et al. 2024"
+          data: main/ZnSe/n2/Polyanskiy.yml
+        - PAGE: Jansonas
+          name: "Jansonas et al. 2022"
+          data: main/ZnSe/n2/Jansonas.yml
+        - PAGE: Patwardhan
+          name: "Patwardhan et al. 2021"
+          data: main/ZnSe/n2/Patwardhan.yml
+        - PAGE: Pigeon
+          name: "Pigeon et al. 2020"
+          data: main/ZnSe/n2/Pigeon.yml
+        - PAGE: Ensley
+          name: "Ensley and Bambha 2019"
+          data: main/ZnSe/n2/Ensley.yml
+        - PAGE: Werner
+          name: "Werner et al. 2019"
+          data: main/ZnSe/n2/Werner.yml
+        - PAGE: Sheik-Bahae
+          name: "Sheik-Bahae et al. 1991"
+          data: main/ZnSe/n2/Sheik-Bahae.yml
+    - DIVIDER: "Si - Silicon"
+    - BOOK: Si
+      name: "Si (Silicon)"
+      content:
+        - PAGE: Polyanskiy
+          name: "Polyanskiy et al. 2024"
+          data: main/Si/n2/Polyanskiy.yml
+        - PAGE: Jansonas
+          name: "Jansonas et al. 2022"
+          data: main/Si/n2/Jansonas.yml
+        - PAGE: Ensley
+          name: "Ensley and Bambha 2019"
+          data: main/Si/n2/Ensley.yml
+        - PAGE: Lin
+          name: "Lin et al. 2007"
+          data: main/Si/n2/Lin.yml
+        - PAGE: Bristow
+          name: "Bristow et al. 2007"
+          data: main/Si/n2/Bristow.yml
+        - PAGE: Tatsuura-100
+          name: "Tatsuura et al. 2005; Si[100]"
+          data: main/Si/n2/Tatsuura-100.yml
+        - PAGE: Tatsuura-111
+          name: "Tatsuura et al. 2005; Si[111]"
+          data: main/Si/n2/Tatsuura-111.yml
+    - DIVIDER: "Ta - Tantalates"
+    - BOOK: KTaO3
+      name: "KTaO<sub>3</sub> (Potassium tantalate)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/KTaO3/n2/Adair.yml
+    - DIVIDER: "Te - Tellurium and tellurides"
+    - BOOK: Te
+      name: "Te (Tellurium)"
+      content:
+        - PAGE: Matteo-o
+          name: "Matteo et al. 2023: (o)"
+          data: main/Te/n2/Matteo-o.yml
+        - PAGE: Matteo-e
+          name: "Matteo et al. 2023: (e)"
+          data: main/Te/n2/Matteo-e.yml
+    - BOOK: CdTe
+      name: "CdTe (Cadmium telluride)"
+      content:
+        - PAGE: Tatsuura-100
+          name: "Tatsuura et al. 2005; CdTe[100]"
+          data: main/CdTe/n2/Tatsuura-100.yml
+        - PAGE: Tatsuura-111
+          name: "Tatsuura et al. 2005; CdTe[111]"
+          data: main/CdTe/n2/Tatsuura-111.yml
+        - PAGE: Sheik-Bahae
+          name: "Sheik-Bahae et al. 1991"
+          data: main/CdTe/n2/Sheik-Bahae.yml
+    - BOOK: ZnTe
+      name: "ZnTe (Zinc telluride)"
+      content:
+        - PAGE: Jansonas
+          name: "Jansonas et al. 2022"
+          data: main/ZnTe/n2/Jansonas.yml
+        - PAGE: Sheik-Bahae
+          name: "Sheik-Bahae et al. 1991"
+          data: main/ZnTe/n2/Sheik-Bahae.yml
+    - DIVIDER: "Ti - Titanates"
+    - BOOK: SrTiO3
+      name: "SrTiO<sub>3</sub> (Strontium titanate, STO)"
+      content:
+        - PAGE: Adair
+          name: "Adair et al. 1989"
+          data: main/SrTiO3/n2/Adair.yml
+    - DIVIDER: "V - Vanadates"
+    - BOOK: YVO4
+      name: "YVO<sub>4</sub> (Yttrium orthovanadate)"
+      content:
+        - PAGE: Kabacinski-o
+          name: "Kabaciński et al. 2019: (o)"
+          data: main/YVO4/n2/Kabacinski-o.yml
+        - PAGE: Kabacinski-e
+          name: "Kabaciński et al. 2019: (e)"
+          data: main/YVO4/n2/Kabacinski-e.yml
+    - DIVIDER: "W - Tungstates"
+    - BOOK: CaWO4
+      name: "CaWO<sub>4</sub> (Calcium tungstate)"
+      content:
+        - PAGE: Adair-o
+          name: "Adair et al. 1989: (o)"
+          data: main/CaWO4/n2/Adair-o.yml
+        - PAGE: Adair-e
+          name: "Adair et al. 1989: (e)"
+          data: main/CaWO4/n2/Adair-e.yml
+    - DIVIDER: "Xe - Xenon"
+    - BOOK: Xe
+      name: "Xe (Xenon)"
+      content:
+        - PAGE: Mareev
+          name: "Mareev et al. 2018"
+          data: main/Xe/n2/Mareev.yml
+        - PAGE: Nibbering
+          name: "Nibbering et al. 1997"
+          data: main/Xe/n2/Nibbering.yml
+- SHELF: other
+  name: "OTHER - miscellaneous materials"
+  content:
+    - DIVIDER: "Mixed gases"
+    - BOOK: air
+      name: "Air"
+      content:
+        - PAGE: Polyanskiy
+          name: "Polyanskiy et al. 2021"
+          data: other/mixed gases/air/n2/Polyanskiy.yml
+        - PAGE: Pigeon
+          name: "Pigeon et al. 2016"
+          data: other/mixed gases/air/n2/Pigeon.yml
+        - PAGE: Geints
+          name: "Geints et al. 2011"
+          data: other/mixed gases/air/n2/Geints.yml
+        - PAGE: Nibbering
+          name: "Nibbering et al. 1997"
+          data: other/mixed gases/air/n2/Nibbering.yml
+        - PAGE: Vlasov
+          name: "Vlasov et al. 1997"
+          data: other/mixed gases/air/n2/Vlasov.yml
+        - PAGE: Shaw
+          name: "Shaw et al. 1993"
+          data: other/mixed gases/air/n2/Shaw.yml
+        - PAGE: Pennington
+          name: "Pennington et al. 1989"
+          data: other/mixed gases/air/n2/Pennington.yml
+        - PAGE: Shimoji
+          name: "Shimoji et al. 1989"
+          data: other/mixed gases/air/n2/Shimoji.yml
+    - DIVIDER: "Semiconductor alloys"
+    - BOOK: AlN-Al2O3
+      name: "AlN-Al<sub>2</sub>O<sub>3</sub> (Aluminium oxynitride, ALON)"
+      content:
+        - PAGE: Flom
+          name: "Flom et al. 2015"
+          data: other/semiconductor alloys/AlN-Al2O3/n2/Flom.yml
+    - DIVIDER: "Mixed crystals"
+    - BOOK: SrNb2O6-BaNb2O6
+      name: "SrNb<sub>2</sub>O<sub>6</sub>-BaNb<sub>2</sub>O<sub>6</sub> (Strontium-barium niobate, SBN)"
+      content:
+        - PAGE: Jansonas
+          name: "Jansonas et al. 2022: SBN61; (o)"
+          data: other/mixed crystals/SrNb2O6-BaNb2O6/n2/Jansonas.yml
+    - BOOK: TlBr-TlCl
+      name: "TlBr-TlCl (Thallium bromo-chloride, KRS-6)"
+      content:
+        - PAGE: Jansonas
+          name: "Jansonas et al. 2022"
+          data: other/mixed crystals/TlBr-TlCl/n2/Jansonas.yml
+    - BOOK: TlBr-TlI
+      name: "TlBr-TlI (Thallium bromo-iodide, KRS-5)"
+      content:
+        - PAGE: Polyanskiy
+          name: "Polyanskiy et al. 2024"
+          data: other/mixed crystals/TlBr-TlI/n2/Polyanskiy.yml
+        - PAGE: Jansonas
+          name: "Jansonas et al. 2022"
+          data: other/mixed crystals/TlBr-TlI/n2/Jansonas.yml
+    - DIVIDER: "Doped crystals"
+    - BOOK: Yb-KGW
+      name: "Yb:KGd(WO<sub>4</sub>)<sub>2</sub> (Ytterbium doped potassium gadolinium tungstate, Yb:KGW)"
+      content:
+        - PAGE: Selivanov-β
+          name: "Selivanov et al. 2006: n2(β)"
+          data: other/doped crystals/Yb-KGd(WO4)2/n2/Selivanov-beta.yml
+    - BOOK: Yb-KYW
+      name: "Yb:KY(WO<sub>4</sub>)<sub>2</sub> (Ytterbium doped potassium yttrium tungstate, Yb:KYW)"
+      content:
+        - PAGE: Selivanov-α
+          name: "Selivanov et al. 2006: n2(α)"
+          data: other/doped crystals/Yb-KY(WO4)2/n2/Selivanov-alpha.yml
+        - PAGE: Selivanov-β
+          name: "Selivanov et al. 2006: n2(β)"
+          data: other/doped crystals/Yb-KY(WO4)2/n2/Selivanov-beta.yml
+        - PAGE: Selivanov-γ
+          name: "Selivanov et al. 2006: n2(γ)"
+          data: other/doped crystals/Yb-KY(WO4)2/n2/Selivanov-gamma.yml
+    - BOOK: Yb-YVO
+      name: "Yb:YVO<sub>4</sub> (Ytterbium-doped yttrium orthovanadate, Yb:YVO)"
+      content:
+        - PAGE: Selivanov-o
+          name: "Selivanov et al. 2006: (o)"
+          data: other/doped crystals/Yb-YVO4/n2/Selivanov-o.yml
+        - PAGE: Selivanov-e
+          name: "Selivanov et al. 2006: (e)"
+          data: other/doped crystals/Yb-YVO4/n2/Selivanov-e.yml
+- SHELF: glass
+  name: "GLASS - glasses"
+  content:
+    - DIVIDER: "Optical glasses"
+    - BOOK: BK7
+      name: "BK7"
+      content:
+        - PAGE: VanderLinden
+          name: "VanderLinden et al. 2025"
+          data: glass/optical/BK7/n2/VanderLinden.yml
+        - PAGE: Ensley
+          name: "Ensley and Bambha 2019"
+          data: glass/optical/BK7/n2/Ensley.yml
+        - PAGE: Flom
+          name: "Flom et al. 2015"
+          data: glass/optical/BK7/n2/Flom.yml
+        - PAGE: Adair
+          name: "Adair et al. 1987"
+          data: glass/optical/BK7/n2/Adair.yml
+    - BOOK: BK10
+      name: "BK10"
+      content:
+        - PAGE: White
+          name: "White et al. 1984"
+          data: glass/optical/BK10/n2/White.yml
+    - DIVIDER: "Infrared glass"
+    - BOOK: AMTIR-1
+      name: "AMTIR-1 (IRG 22)"
+      content:
+        - PAGE: Polyanskiy
+          name: "Polyanskiy et al. 2024"
+          data: glass/infrared/AMTIR-1/n2/Polyanskiy.yml
+        - PAGE: Ensley
+          name: "Ensley and Bambha 2019"
+          data: glass/infrared/AMTIR-1/n2/Ensley.yml
+    - BOOK: IRG24
+      name: "IRG 24"
+      content:
+        - PAGE: Polyanskiy
+          name: "Polyanskiy et al. 2024"
+          data: glass/infrared/IRG24/n2/Polyanskiy.yml
+    - BOOK: IRG25
+      name: "IRG 25"
+      content:
+        - PAGE: Polyanskiy
+          name: "Polyanskiy et al. 2024"
+          data: glass/infrared/IRG25/n2/Polyanskiy.yml
+    - BOOK: AMTIR-2
+      name: "AMTIR-2 (IRG 26)"
+      content:
+        - PAGE: Ensley
+          name: "Ensley and Bambha 2019"
+          data: glass/infrared/AMTIR-2/n2/Ensley.yml
+    - BOOK: AMTIR-6
+      name: "AMTIR-6 (IRG 27)"
+      content:
+        - PAGE: Ensley
+          name: "Ensley and Bambha 2019"
+          data: glass/infrared/AMTIR-6/n2/Ensley.yml
+    - DIVIDER: "Multiple purpose glass"
+    - BOOK: BGG
+      name: "BGG (barium gallogermanate) glass"
+      content:
+        - PAGE: Flom
+          name: "Flom et al. 2015"
+          data: glass/misc/BGG/n2/Flom.yml
+- SHELF: organic
+  name: "ORGANIC - organic materials"
+  content:
+    - DIVIDER: "Alkanes"
+    - BOOK: methane
+      name: "CH<sub>4</sub> (Methane)"
+      content:
+        - PAGE: Shaw
+          name: "Shaw et al. 1993"
+          data: organic/CH4 - methane/n2/Shaw.yml
+    - DIVIDER: "Polymers"
+    - BOOK: polyethylene_terephthalate
+      name: "(C<sub>10</sub>H<sub>8</sub>O<sub>4</sub>)<sub>n</sub> (Polyethylene terephthalate, PET)"
+      content:
+        - PAGE: Mironov
+          name: "Mironov et al. 2015"
+          data: organic/(C10H8O4)n - polyethylene terephthalate/n2/Mironov.yml
