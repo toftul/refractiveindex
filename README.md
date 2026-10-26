@@ -94,6 +94,23 @@ bk7.get_wl_range(unit='cm-1') # e.g. (4000.0, 33333.3) cm⁻¹
 
 Result is always returned as `(min, max)`. 
 
+The n data and the k data of a material can cover different wavelength ranges. Use `quantity` to select the range:
+
+| `quantity` | Range | Valid for |
+|---|---|---|
+| `'epsilon'` (default) or `'nk'` | Overlap of the n and k ranges. Without k data, the n range. | `get_epsilon` |
+| `'n'` | Range of the n data | `get_refractive_index` |
+| `'k'` | Range of the k data | `get_extinction_coefficient` |
+
+```python
+laf3 = RefractiveIndexMaterial(shelf='main', book='LaF3', page='Amotchkina')
+laf3.get_wl_range(quantity='n')  # (400.0, 12000.0)  nm
+laf3.get_wl_range(quantity='k')  # (9493.08, 11973.9) nm
+laf3.get_wl_range()              # (9493.08, 11973.9) nm, the overlap
+```
+
+If the material has no data for `quantity`, `get_wl_range` raises the same exception as the matching method, for example `NoExtinctionCoefficient` for `quantity='k'`. If the n and k ranges do not overlap, it raises `ValueError`.
+
 ### Out-of-range behavior
 
 No exception is raised for out-of-range wavelengths, but the returned value is not reliable:
@@ -108,7 +125,7 @@ Check `get_wl_range()` before querying if you are not certain the wavelength is 
 ```python
 lo, hi = mat.get_wl_range()
 if lo <= wavelength <= hi:
-    n = mat.get_refractive_index(wavelength)
+    eps = mat.get_epsilon(wavelength)
 else:
     raise ValueError(f"wavelength {wavelength} nm is outside the valid range [{lo}, {hi}] nm")
 ```

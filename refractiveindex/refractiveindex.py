@@ -248,11 +248,27 @@ _EXP_TYPES = {
 }
 
 
+# Values of quantity in get_wl_range. 'nk' is another name for 'epsilon': the overlap of n and k.
+_WL_RANGE_QUANTITIES = ("epsilon", "nk", "n", "k")
+
+
 def _make_interpolator(wavelengths, values):
     if len(wavelengths) == 1:
         val = values[0]
         return lambda wl: np.full_like(np.asarray(wl, dtype=float), val)
-    return scipy.interpolate.interp1d(wavelengths, values, bounds_error=False)
+    interp = scipy.interpolate.interp1d(wavelengths, values, bounds_error=False)
+
+    # Unit conversion can move a range end a few ulp out of the table, so that the
+    # wavelengths from get_wl_range would give nan. Move such wavelengths onto the end.
+    rtol = 1e-9
+    lo, hi = np.min(wavelengths), np.max(wavelengths)
+
+    def interpolate(wl):
+        wl = np.asarray(wl, dtype=float)
+        in_range = (wl >= lo * (1 - rtol)) & (wl <= hi * (1 + rtol))
+        return interp(np.where(in_range, np.clip(wl, lo, hi), wl))
+
+    return interpolate
 
 
 class NoExtinctionCoefficient(Exception):
@@ -303,7 +319,9 @@ class RefractiveIndexMaterial:
 
         self._n_func = None
         self._k_func = None
-        self._wl_range = None
+        # Wavelength ranges in µm of the n and k data, set together with _n_func and _k_func
+        self._n_range = None
+        self._k_range = None
         self._original_data = None
 
         for data in material["DATA"]:
@@ -313,23 +331,25 @@ class RefractiveIndexMaterial:
 
             if category == "tabulated":
                 wl, col1, col2 = _parse_tabulated(data["data"])
+                # Some tables are not in wavelength order, so not (wl[0], wl[-1])
+                wl_range = (wl.min(), wl.max())
 
                 if subtype == "n":
                     self._n_func = _make_interpolator(wl, col1)
-                    self._wl_range = (wl[0], wl[-1])
+                    self._n_range = wl_range
                     self._original_data = {"wavelength (um)": wl, "n": col1}
 
                 elif subtype == "k":
                     self._k_func = _make_interpolator(wl, col1)
-                    if self._wl_range is None:
-                        self._wl_range = (wl[0], wl[-1])
+                    self._k_range = wl_range
                     if self._original_data is None:
                         self._original_data = {"wavelength (um)": wl, "n": 1j * col1}
 
                 elif subtype == "nk":
                     self._n_func = _make_interpolator(wl, col1)
                     self._k_func = _make_interpolator(wl, col2)
-                    self._wl_range = (wl[0], wl[-1])
+                    self._n_range = wl_range
+                    self._k_range = wl_range
                     self._original_data = {"wavelength (um)": wl, "n": col1 + 1j * col2}
 
             elif category == "formula":
@@ -344,8 +364,8 @@ class RefractiveIndexMaterial:
                 range_min = float(range_parts[0])
                 range_max = float(range_parts[1])
 
-                self._wl_range = (range_min, range_max)
-                self._n_func = lambda wl_um, fid=formula_id, co=coefficients: _compute_formula(fid, co, wl_um)
+                self._n_range = (range_min, range_max)
+                self._n_func =lambda wl_um, fid=formula_id, co=coefficients: _compute_formula(fid, co, wl_um)
 
                 wl_sample = np.linspace(range_min, range_max, 1000)
                 self._original_data = {
@@ -436,19 +456,53 @@ class RefractiveIndexMaterial:
             return (n + 1j * k) ** 2
         return (n - 1j * k) ** 2
 
-    def get_wl_range(self, unit="nm"):
-        """Return the valid range as (min, max) in the requested unit, or None if unknown.
+    def get_wl_range(self, unit="nm", quantity="epsilon"):
+        """Return the wavelength range of the data as (min, max) in the requested unit.
 
         Args:
             unit: Output unit. Supported: 'm', 'mm', 'um', 'nm' (default),
                   'A' (Angstrom), 'cm-1', 'THz', 'eV'.
+            quantity: The data that the range is for.
+                  'epsilon' (default) or 'nk': the overlap of the n and k ranges, where
+                  get_epsilon is valid. Without k data, the n range, as get_epsilon then
+                  takes k as 0.
+                  'n': the range of the n data, where get_refractive_index is valid.
+                  'k': the range of the k data, where get_extinction_coefficient is valid.
+
+        Raises:
+            Exception: quantity is 'n', 'nk' or 'epsilon' and the material has no n data,
+                  as from get_refractive_index.
+            NoExtinctionCoefficient: quantity is 'k' and the material has no k data.
+            ValueError: The n and k ranges do not overlap, or quantity or unit is unknown.
 
         Note:
             The result is always sorted (min, max). For reciprocal units
             ('cm-1', 'THz', 'eV') this reverses the wavelength ordering.
         """
-        if self._wl_range is None:
-            return None
-        a = _from_um(self._wl_range[0], unit)
-        b = _from_um(self._wl_range[1], unit)
-        return (min(a, b), max(a, b))
+        if quantity not in _WL_RANGE_QUANTITIES:
+            raise ValueError(f"quantity must be one of {list(_WL_RANGE_QUANTITIES)}, got {quantity!r}")
+
+        def convert(wl_range):
+            a = _from_um(wl_range[0], unit)
+            b = _from_um(wl_range[1], unit)
+            return (min(a, b), max(a, b))
+
+        if quantity == "k":
+            if self._k_range is None:
+                raise NoExtinctionCoefficient("No extinction coefficient specified for this material")
+            return convert(self._k_range)
+        if self._n_range is None:
+            raise Exception("No refractive index specified for this material")
+        if quantity == "n" or self._k_range is None:
+            return convert(self._n_range)
+
+        lo = max(self._n_range[0], self._k_range[0])
+        hi = min(self._n_range[1], self._k_range[1])
+        if lo > hi:
+            n_lo, n_hi = convert(self._n_range)
+            k_lo, k_hi = convert(self._k_range)
+            raise ValueError(
+                f"The n data ({n_lo:g}–{n_hi:g} {unit}) and the k data ({k_lo:g}–{k_hi:g} {unit}) "
+                "do not overlap. Use quantity='n' or quantity='k'."
+            )
+        return convert((lo, hi))
