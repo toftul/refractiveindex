@@ -148,11 +148,6 @@ Open the material page on [refractiveindex.info](https://refractiveindex.info) a
 Or you can look up folders in this repository<br>
 https://github.com/polyanskiy/refractiveindex.info-database
 
-## Similar projects
-
-- [PyTMM](https://github.com/kitchenknif/PyTMM) by [Pavel Dmitriev](https://github.com/kitchenknif) — the original database parsing code this project was based on
-- [RefractiveIndex.jl](https://github.com/stillyslalom/RefractiveIndex.jl) — Julia interface to refractiveindex.info database
-
 ## Database version
 
 The package includes a release of the [refractiveindex.info database](https://github.com/polyanskiy/refractiveindex.info-database), so a version of the package always gives the same data. To see which release it includes:
@@ -194,6 +189,13 @@ If you use the data in research, cite the refractiveindex.info database, as its 
 To make your results reproducible, also give the database version, for example "refractiveindex.info database v2026-05-24, used through the refractiveindex Python package 1.2.0".
 
 The database is in the public domain ([CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)). A copy of its licence is in `refractiveindex/database/LICENSE`.
+
+
+## Similar projects
+
+- [PyTMM](https://github.com/kitchenknif/PyTMM) by [Pavel Dmitriev](https://github.com/kitchenknif) — the original database parsing code this project was based on
+- [RefractiveIndex.jl](https://github.com/stillyslalom/RefractiveIndex.jl) — Julia interface to refractiveindex.info database
+
 
 ## TODO
 
