@@ -4,6 +4,35 @@ This file lists the changes in each release of `refractiveindex`.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 The version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- The package now includes the refractiveindex.info database, release v2026-05-24.
+  The library does not download the database any more and needs no network access.
+  The package download is about 15 MB.
+- `refractiveindex.DATABASE_VERSION` and `refractiveindex.DATABASE_COMMIT` give the release and the upstream commit of the included database.
+- A weekly GitHub workflow opens a PR when upstream publishes a new database release.
+- The publish workflow stops if the wheel does not contain all database files.
+
+### Changed
+
+- All users of a package version now get the same data.
+  Before this change, each user got the database version that the library downloaded on first use.
+- `db_path` must point at a folder with `catalog-nk.yml`, for example the `database/` folder of the upstream repository.
+  Before this change, the library downloaded the database into a missing folder. Now it raises `FileNotFoundError`.
+- The weekly CI test run is removed, because the data no longer changes between runs.
+
+### Deprecated
+
+- `auto_download`, `update_database` and `ssl_certificate_location` have no effect and give a `DeprecationWarning`.
+  Version 2.0.0 will remove them.
+- `databasePath` gives a `DeprecationWarning`. Use `db_path` instead. Version 2.0.0 will remove it.
+
+### Removed
+
+- The download code. The library no longer reads or writes `~/.refractiveindex.info-database`, so you can delete this folder.
+
 ## [1.1.0] - 2026-10-26
 
 ### Added
