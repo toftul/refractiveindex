@@ -30,6 +30,23 @@ jobs:
           python -m pip install --upgrade pip build
           python -m build
 
+      - name: Check that the wheel contains the database
+        run: |
+          python - <<'EOF'
+          import glob, subprocess, sys, zipfile
+          tracked = subprocess.run(["git", "ls-files", "-z", "refractiveindex/database"],
+                                   capture_output=True, check=True).stdout.decode().split("\0")
+          expected = {name for name in tracked if name}
+          wheel = glob.glob("dist/*.whl")[0]
+          found = {name for name in zipfile.ZipFile(wheel).namelist()
+                   if name.startswith("refractiveindex/database/")}
+          if "refractiveindex/database/catalog-nk.yml" not in found or found != expected:
+              print(f"::error::{wheel} has {len(found)} database files, git tracks {len(expected)}. "
+                    f"Missing: {sorted(expected - found)[:5]}. Extra: {sorted(found - expected)[:5]}.")
+              sys.exit(1)
+          print(f"{wheel} contains all {len(found)} database files.")
+          EOF
+
       - uses: actions/upload-artifact@v4
         with:
           name: dist

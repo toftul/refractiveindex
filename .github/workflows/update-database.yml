@@ -1,0 +1,113 @@
+name: Update database
+
+# Every Monday, check for a new release of the upstream refractiveindex.info-database.
+# If there is one, update refractiveindex/database/, run the tests, and open a PR.
+# A PR that GitHub Actions opens does not start other workflows, so this job runs the
+# tests itself and writes the result into the PR description.
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Upstream release tag, for example v2026-05-24. Empty: the latest release."
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Find the upstream release
+        id: release
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          TAG="${INPUT_TAG:-$(gh api repos/polyanskiy/refractiveindex.info-database/releases/latest --jq .tag_name)}"
+          if ! [[ "$TAG" =~ ^v[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+            echo "::error::Unexpected upstream tag: $TAG"
+            exit 1
+          fi
+          CURRENT="$(python -c 'import runpy; print(runpy.run_path("refractiveindex/_database_version.py")["DATABASE_VERSION"])')"
+          BRANCH="update-database-$TAG"
+          echo "Upstream release: $TAG. Included database: $CURRENT."
+          if [ "$TAG" = "$CURRENT" ]; then
+            echo "The included database is already $TAG."
+          elif git ls-remote --exit-code --heads origin "$BRANCH" > /dev/null; then
+            echo "Branch $BRANCH exists. Merge or close its PR and delete the branch first."
+          else
+            echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+            echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update the database
+        if: steps.release.outputs.tag
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+        run: python scripts/update_database.py "$TAG" --changelog
+
+      - name: Run the tests
+        id: tests
+        if: steps.release.outputs.tag
+        run: |
+          python -m pip install --upgrade pip
+          pip install . pytest
+          set +e
+          pytest 2>&1 | tee pytest.log
+          if [ "${PIPESTATUS[0]}" -eq 0 ]; then
+            echo "result=passed" >> "$GITHUB_OUTPUT"
+          else
+            echo "result=failed" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open a pull request
+        if: steps.release.outputs.tag
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+          BRANCH: ${{ steps.release.outputs.branch }}
+          RESULT: ${{ steps.tests.outputs.result }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add -A refractiveindex/database refractiveindex/_database_version.py CHANGELOG.md
+          git commit -m "Update the database to $TAG"
+          git push origin "$BRANCH"
+
+          TITLE="Update the database to $TAG"
+          if [ "$RESULT" != "passed" ]; then
+            TITLE="$TITLE (tests failed)"
+          fi
+          {
+            echo "This PR updates the included refractiveindex.info database to [$TAG](https://github.com/polyanskiy/refractiveindex.info-database/releases/tag/$TAG)."
+            echo "Changes in \`refractiveindex/database/\`:$(git diff --shortstat HEAD~1 -- refractiveindex/database)"
+            echo
+            echo "## Tests: $RESULT"
+            echo
+            echo "The update workflow ran the tests on the new data."
+            echo "CI does not start on a PR that GitHub Actions opens. To run CI too, close and reopen this PR."
+            echo "If \`test_fixes_still_needed\` fails, upstream has fixed a catalog error: remove that entry from \`_CATALOG_FIXES\`."
+            echo
+            echo '```'
+            tail -n 60 pytest.log
+            echo '```'
+            echo
+            echo "After the merge, publish a release to put the new data on PyPI."
+          } > pr-body.md
+          gh pr create --base main --head "$BRANCH" --title "$TITLE" --body-file pr-body.md
