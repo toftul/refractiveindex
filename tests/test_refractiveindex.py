@@ -1,10 +1,9 @@
 """Tests for the python interface to the RefractiveIndex database."""
 
-import contextlib
-import io
-import ssl
+import re
 import tempfile
 import unittest
+import warnings
 from pathlib import Path
 from unittest import mock
 
@@ -414,7 +413,6 @@ class TestCatalogFixes(unittest.TestCase):
     def test_fixes_still_needed(self):
         """Fails once upstream fixes a catalog error, as a reminder to remove the fix."""
         from refractiveindex.refractiveindex import _CATALOG_FIXES, _DEFAULT_DB_PATH, _read_catalog
-        ri.RefractiveIndexMaterial(shelf='main', book='SiO2', page='Malitson')  # ensure database
         catalog = _read_catalog(_DEFAULT_DB_PATH)
         for key, (bad_path, _) in _CATALOG_FIXES.items():
             self.assertEqual(
@@ -424,99 +422,67 @@ class TestCatalogFixes(unittest.TestCase):
             )
 
 
-class TestDatabaseUpdates(unittest.TestCase):
-    """Tests for database update functionality."""
+class TestBundledDatabase(unittest.TestCase):
+    """The database included in the package is the default, and no network is used."""
 
-    def test_database_version_file_exists(self):
-        """Test that database version file exists after material loading."""
-        from pathlib import Path
-        version_file = Path.home() / '.refractiveindex.info-database' / '.version'
-        
-        # Load a material (this should create/update the version file)
-        m = ri.RefractiveIndexMaterial(shelf='main', book='SiO2', page='Malitson')
-        
-        # Check that version file exists
-        self.assertTrue(version_file.exists())
-        
-        # Check that it contains some content (hash)
-        with open(version_file, 'r') as f:
-            hash_content = f.read().strip()
-        
-        # Should not be empty
-        self.assertGreater(len(hash_content), 0)
+    def test_default_is_bundled(self):
+        """The default database is refractiveindex/database/ inside the package."""
+        from refractiveindex.refractiveindex import _DEFAULT_DB_PATH
+        self.assertEqual(_DEFAULT_DB_PATH, Path(ri.__file__).parent / 'database')
+        self.assertTrue((_DEFAULT_DB_PATH / 'catalog-nk.yml').is_file())
+        self.assertTrue((_DEFAULT_DB_PATH / 'LICENSE').is_file())
 
+    def test_no_network(self):
+        """Loading a material makes no network request."""
+        with mock.patch('urllib.request.urlopen', side_effect=AssertionError('network used')):
+            m = ri.RefractiveIndexMaterial(shelf='main', book='SiO2', page='Malitson')
+        self.assertAlmostEqual(m.get_refractive_index(633), 1.4570, places=4)
 
-# Self-signed CA certificate, used only as a trusted certificate file in TestDownloadSSL.
-_TEST_CA_PEM = """\
------BEGIN CERTIFICATE-----
-MIIBmzCCAUGgAwIBAgIUfqOC4nrFSgqHSdnuERKkPoaBKOYwCgYIKoZIzj0EAwIw
-IjEgMB4GA1UEAwwXcmVmcmFjdGl2ZWluZGV4IHRlc3QgQ0EwIBcNMjYxMDI1MjMy
-MDU5WhgPMjEyNjEwMDEyMzIwNTlaMCIxIDAeBgNVBAMMF3JlZnJhY3RpdmVpbmRl
-eCB0ZXN0IENBMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEuyRr4qPveLaxcjMX
-7kcvNVOdAbhLgkWs/MwYrDoKXomX2d4FUxDVpfCb+2LzdI3Gbqd6T8uUXVwlpwrz
-64ajBKNTMFEwHQYDVR0OBBYEFI38wKpH2PHhH/p1DkECd/vfyXXYMB8GA1UdIwQY
-MBaAFI38wKpH2PHhH/p1DkECd/vfyXXYMA8GA1UdEwEB/wQFMAMBAf8wCgYIKoZI
-zj0EAwIDSAAwRQIhAOdeOYsnhqrzYqv82ikwFmRC7EHo1Cj2n/cR1LTy9mjHAiAu
-qipjcWmndSvMuvxG0YjeLpv+rYgUiVbwW21AeDaKLw==
------END CERTIFICATE-----
-"""
+    def test_version_constants(self):
+        """DATABASE_VERSION is an upstream release tag and DATABASE_COMMIT a full commit SHA."""
+        self.assertRegex(ri.DATABASE_VERSION, r'^v\d{4}-\d{2}-\d{2}$')
+        self.assertRegex(ri.DATABASE_COMMIT, r'^[0-9a-f]{40}$')
 
+    def test_db_path(self):
+        """db_path (str or Path) selects a database folder."""
+        from refractiveindex.refractiveindex import _DEFAULT_DB_PATH
+        default = ri.RefractiveIndexMaterial(shelf='main', book='SiO', page='Hass')
+        for db_path in (_DEFAULT_DB_PATH, str(_DEFAULT_DB_PATH)):
+            with self.subTest(db_path=db_path):
+                m = ri.RefractiveIndexMaterial(shelf='main', book='SiO', page='Hass', db_path=db_path)
+                self.assertEqual(m.get_refractive_index(600), default.get_refractive_index(600))
 
-class TestDownloadSSL(unittest.TestCase):
-    """ssl_certificate_location applies to the download requests only. No network is used."""
-
-    def setUp(self):
-        self.default_https_context = ssl._create_default_https_context
-
-    def tearDown(self):
-        # The process-wide default must stay as it was.
-        self.assertIs(ssl._create_default_https_context, self.default_https_context)
-
-    def _urlopen_contexts(self, ssl_certificate_location):
-        """Run _download_database with a fake urlopen and return the SSL contexts it received."""
-        from refractiveindex.refractiveindex import _download_database
-        contexts = []
-
-        def fake_urlopen(url, *args, context=None, **kwargs):
-            contexts.append(context)
-            raise OSError("no network in this test")
-
-        with tempfile.TemporaryDirectory() as tempdir, \
-                mock.patch("urllib.request.urlopen", fake_urlopen), \
-                contextlib.redirect_stderr(io.StringIO()):
-            with self.assertRaises(OSError):
-                _download_database(Path(tempdir) / "db", ssl_certificate_location)
-        # One request for the latest commit hash, one for the database archive.
-        self.assertEqual(len(contexts), 2)
-        return contexts
-
-    def test_default(self):
-        """Without ssl_certificate_location, the requests use the system default."""
-        self.assertEqual(self._urlopen_contexts(None), [None, None])
-
-    def test_certificate_file(self):
-        """A .pem file is trusted for both requests."""
+    def test_db_path_without_catalog(self):
+        """A db_path without catalog-nk.yml raises FileNotFoundError that names the file."""
         with tempfile.TemporaryDirectory() as tempdir:
-            pem = Path(tempdir) / "ca.pem"
-            pem.write_text(_TEST_CA_PEM)
-            contexts = self._urlopen_contexts(str(pem))
-        for context in contexts:
-            self.assertIsInstance(context, ssl.SSLContext)
-            self.assertEqual(context.verify_mode, ssl.CERT_REQUIRED)
-            subjects = [cert["subject"] for cert in context.get_ca_certs()]
-            self.assertEqual(subjects, [((("commonName", "refractiveindex test CA"),),)])
+            with self.assertRaisesRegex(FileNotFoundError, re.escape('catalog-nk.yml')):
+                ri.RefractiveIndexMaterial(shelf='main', book='SiO', page='Hass', db_path=tempdir)
 
-    def test_unverified(self):
-        """An empty string turns off certificate checks for both requests."""
-        for context in self._urlopen_contexts(""):
-            self.assertIsInstance(context, ssl.SSLContext)
-            self.assertEqual(context.verify_mode, ssl.CERT_NONE)
-            self.assertFalse(context.check_hostname)
 
-    def test_missing_certificate_file(self):
-        """A path that is not an existing .pem file raises ValueError before any request."""
-        from refractiveindex.refractiveindex import _download_database
-        with mock.patch("urllib.request.urlopen") as fake_urlopen:
-            with self.assertRaises(ValueError):
-                _download_database(Path("unused"), "/nonexistent/ca.pem")
-        fake_urlopen.assert_not_called()
+class TestDeprecatedArguments(unittest.TestCase):
+    """Arguments of the download code warn and have no effect (removed in 2.0.0)."""
+
+    def test_no_warning_by_default(self):
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            ri.RefractiveIndexMaterial(shelf='main', book='SiO', page='Hass')
+        self.assertEqual([w for w in caught if issubclass(w.category, DeprecationWarning)], [])
+
+    def test_download_arguments_warn(self):
+        """Each argument warns for any value, at the line of the caller."""
+        for kwargs in ({'auto_download': True}, {'auto_download': False},
+                       {'update_database': True}, {'ssl_certificate_location': None},
+                       {'ssl_certificate_location': ''}):
+            with self.subTest(**kwargs):
+                with self.assertWarns(DeprecationWarning) as cm:
+                    m = ri.RefractiveIndexMaterial(shelf='main', book='SiO', page='Hass', **kwargs)
+                self.assertIn(next(iter(kwargs)), str(cm.warning))
+                self.assertEqual(cm.filename, __file__)
+                self.assertAlmostEqual(m.get_refractive_index(600), 1.96553846)
+
+    def test_databasePath_alias(self):
+        """databasePath warns and still selects the database folder."""
+        with tempfile.TemporaryDirectory() as tempdir:
+            with self.assertWarns(DeprecationWarning):
+                with self.assertRaises(FileNotFoundError):
+                    ri.RefractiveIndexMaterial(shelf='main', book='SiO', page='Hass', databasePath=tempdir)
