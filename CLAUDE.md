@@ -23,6 +23,7 @@ Tests need no network access.
 Single-module library (`refractiveindex/refractiveindex.py`) with 1 public class + helper functions:
 
 - **`RefractiveIndexMaterial`** — Public API. Takes `shelf`, `book`, `page` identifiers to locate a material. All wavelengths are in **nanometers**. Stores `_n_func` and `_k_func` callables internally. `db_path=` selects another `database/` folder (default `_DEFAULT_DB_PATH`, the included one).
+- **`RefractiveIndexMaterial.from_url(url, db_path=None)`** — Classmethod. Reads `shelf`, `book`, `page` from the query string of a refractiveindex.info address-bar URL and calls the constructor. Other URLs, such as data-file links, raise `ValueError`.
 - **`_DEPRECATED`** — Default of `auto_download`, `update_database`, `ssl_certificate_location` and `databasePath`. Passing any of them gives a `DeprecationWarning`; the first three have no effect, `databasePath` is an alias for `db_path`. Remove all four in 2.0.0.
 - **`_read_catalog(db_path)`** — Parses `catalog-nk.yml` as is into a flat `(shelf, book, page) -> data path` dict.
 - **`_load_catalog(db_path)`** — Applies `_CATALOG_FIXES` to `_read_catalog` output and builds `(shelf, book, page) -> filepath`, cached at module level in `_catalog_cache`.

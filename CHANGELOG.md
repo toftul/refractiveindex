@@ -4,6 +4,14 @@ This file lists the changes in each release of `refractiveindex`.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 The version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `RefractiveIndexMaterial.from_url(url)` loads a material from the URL of its page on refractiveindex.info,
+  for example `https://refractiveindex.info/?shelf=main&book=SiO2&page=Malitson`.
+  The data comes from the included database (or `db_path=`), not from the website.
+
 ## [1.2.0] - 2026-10-26
 
 ### Added
@@ -206,6 +214,7 @@ The version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 - First release.
 
+[Unreleased]: https://github.com/toftul/refractiveindex/compare/v1.2.0...HEAD
 [1.2.0]: https://github.com/toftul/refractiveindex/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/toftul/refractiveindex/compare/v1.0.5...v1.1.0
 [1.0.5]: https://github.com/toftul/refractiveindex/compare/v1.0.4...v1.0.5
