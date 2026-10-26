@@ -89,7 +89,7 @@ No exception is raised for out-of-range wavelengths, but the returned value is n
 | Tabulated (`n`, `k`, `nk`) | `nan` |
 | Formula (1–9) | Silent extrapolation — may be unphysical, or `nan` with a `RuntimeWarning` if the formula evaluates a square root of a negative number |
 
-Always check `get_wl_range()` before querying if you are not certain the wavelength is within the measured range:
+Check `get_wl_range()` before querying if you are not certain the wavelength is within the measured range:
 
 ```python
 lo, hi = mat.get_wl_range()
@@ -105,7 +105,7 @@ Notes:
   SiO.get_epsilon(600, exp_type="exp(+iwt)")  # (n - ik)^2
   # (3.8633404437869827-0.003931076923076923j)
   ```
-  The default is `exp_type="exp(-iwt)"`. You can also write `"exp(iwt)"`, `j` instead of `i`, and `ω` instead of `w`, for example `"exp(-jωt)"`. Here `j` is the imaginary unit, so only the sign selects the convention. The old names `"exp_minus_i_omega_t"` and `"exp_plus_i_omega_t"` also work.
+  The default is `exp_type="exp(-iwt)"`. You can also write `"exp(iwt)"`, `j` instead of `i`, and `ω` instead of `w`, for example `"exp(-jωt)"`. 
 - If there is a space in the name, write underscore instead, i.e. not `page='Rodriguez-de Marcos'` but `page='Rodriguez-de_Marcos'`.
 - All 9 [dispersion formula types](https://github.com/polyanskiy/refractiveindex.info-database/blob/master/database/doc/Dispersion%20formulas.pdf) used by the refractiveindex.info database are supported: Sellmeier (1), Sellmeier-2 (2), Polynomial (3), RefractiveIndex.INFO (4), Cauchy (5), Gases (6), Herzberger (7), Retro (8), and Exotic (9).
 - The database is automatically downloaded on first use to `~/.refractiveindex.info-database`.
