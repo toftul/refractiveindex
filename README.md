@@ -11,6 +11,8 @@ https://github.com/polyanskiy/refractiveindex.info-database
 pip install refractiveindex
 ```
 
+The package includes the refractiveindex.info database, so the library needs no network access. The download is about 15 MB. See [Database version](#database-version).
+
 ## Usage
 
 ```python
@@ -108,7 +110,7 @@ Notes:
   The default is `exp_type="exp(-iwt)"`. You can also write `"exp(iwt)"`, `j` instead of `i`, and `ω` instead of `w`, for example `"exp(-jωt)"`. 
 - If there is a space in the name, write underscore instead, i.e. not `page='Rodriguez-de Marcos'` but `page='Rodriguez-de_Marcos'`.
 - All 9 [dispersion formula types](https://github.com/polyanskiy/refractiveindex.info-database/blob/master/database/doc/Dispersion%20formulas.pdf) used by the refractiveindex.info database are supported: Sellmeier (1), Sellmeier-2 (2), Polynomial (3), RefractiveIndex.INFO (4), Cauchy (5), Gases (6), Herzberger (7), Retro (8), and Exotic (9).
-- The database is automatically downloaded on first use to `~/.refractiveindex.info-database`.
+- The data comes from the database included in the package. See [Database version](#database-version).
 
 ## How to get material page names
 
@@ -124,13 +126,47 @@ https://github.com/polyanskiy/refractiveindex.info-database
 - [PyTMM](https://github.com/kitchenknif/PyTMM) by [Pavel Dmitriev](https://github.com/kitchenknif) — the original database parsing code this project was based on
 - [RefractiveIndex.jl](https://github.com/stillyslalom/RefractiveIndex.jl) — Julia interface to refractiveindex.info database
 
-## Possible problems
+## Database version
 
-If the upstream database has changed its structure, upgrade the package
+The package includes a release of the [refractiveindex.info database](https://github.com/polyanskiy/refractiveindex.info-database), so a version of the package always gives the same data. To see which release it includes:
+
+```python
+import refractiveindex
+refractiveindex.DATABASE_VERSION  # 'v2026-05-24'
+refractiveindex.DATABASE_COMMIT   # the upstream commit of this release
+```
+
+A new upstream release comes with a new version of the package:
 ```shell
 pip install --upgrade refractiveindex
 ```
-and remove the database folder at `~/.refractiveindex.info-database`.
+
+### Use another copy of the database
+
+To use data that is newer than the included release, clone the upstream repository and give its `database/` folder as `db_path`:
+
+```shell
+git clone https://github.com/polyanskiy/refractiveindex.info-database
+```
+
+```python
+SiO2 = RefractiveIndexMaterial(shelf='main', book='SiO2', page='Malitson',
+                               db_path='refractiveindex.info-database/database')
+```
+
+### Old database folder
+
+Versions before 1.2.0 downloaded the database to `~/.refractiveindex.info-database`. Version 1.2.0 and later do not use this folder, so you can delete it.
+
+## How to cite
+
+If you use the data in research, cite the refractiveindex.info database, as its author asks:
+
+> M. N. Polyanskiy, "Refractiveindex.info database of optical constants," *Scientific Data* **11**, 94 (2024). https://doi.org/10.1038/s41597-023-02898-2
+
+To make your results reproducible, also give the database version, for example "refractiveindex.info database v2026-05-24, used through the refractiveindex Python package 1.2.0".
+
+The database is in the public domain ([CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)). A copy of its licence is in `refractiveindex/database/LICENSE`.
 
 ## TODO
 
