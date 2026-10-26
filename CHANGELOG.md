@@ -11,6 +11,29 @@ The version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.
 - `RefractiveIndexMaterial.from_url(url)` loads a material from the URL of its page on refractiveindex.info,
   for example `https://refractiveindex.info/?shelf=main&book=SiO2&page=Malitson`.
   The data comes from the included database (or `db_path=`), not from the website.
+- `get_wl_range(quantity=...)` selects the range: `'n'` for the n data, `'k'` for the k data,
+  or `'epsilon'` (the default) or `'nk'` for the overlap of the two.
+
+### Changed
+
+- `get_wl_range()` returns the range where `get_epsilon` is valid: the overlap of the n and k ranges, or the n range if the material has no k data.
+  Before this change, it returned the n range, also when the k data covered less.
+  Then `get_extinction_coefficient` and `get_epsilon` returned `nan` inside the returned range.
+  This changes the result for 275 materials, for example `main/LaF3/Amotchkina`.
+  To get the old result, use `quantity='n'`.
+- For materials with k data only, `get_wl_range()` raises the same exception as `get_refractive_index`.
+  Before this change, it returned the k range. To get it, use `quantity='k'`.
+- `get_wl_range()` raises `ValueError` if the n and k ranges do not overlap,
+  for example for `specs/HIKARI-optical/J-SF03HS`.
+- `get_wl_range` does not return `None` any more.
+
+### Fixed
+
+- `get_wl_range` takes the range of tabulated data from the smallest and largest wavelengths, not from the first and last rows.
+  This corrects the range of `main/CaMg_CO3_2/Querry-o`, whose rows are not in wavelength order.
+- Tabulated data gives values, not `nan`, at the ends of the range from `get_wl_range`.
+  Before this fix, unit conversion could move a range end a little out of the table,
+  for example 3300 nm for `main/Au/Yakubovsky-4nm`, which is 3.3000000000000003 µm after conversion.
 
 ## [1.2.0] - 2026-10-26
 

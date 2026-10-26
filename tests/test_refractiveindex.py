@@ -318,6 +318,101 @@ class TestUnits(unittest.TestCase):
             self.baf2.get_wl_range(unit='lightyear')
 
 
+class TestWavelengthRange(unittest.TestCase):
+    """Tests for the quantity= argument of get_wl_range."""
+
+    def setUp(self):
+        # Formula n (0.4–12 µm) and tabulated k (9.49308–11.9739 µm)
+        self.laf3 = ri.RefractiveIndexMaterial(shelf='main', book='LaF3', page='Amotchkina')
+
+    def test_n_and_k_ranges(self):
+        """quantity='n' and quantity='k' give the range of each data block."""
+        np.testing.assert_allclose(self.laf3.get_wl_range(quantity='n'), (400, 12000))
+        np.testing.assert_allclose(self.laf3.get_wl_range(quantity='k'), (9493.08, 11973.9))
+
+    def test_default_is_epsilon(self):
+        """The default is quantity='epsilon', the overlap of n and k."""
+        self.assertEqual(self.laf3.get_wl_range(), self.laf3.get_wl_range(quantity='epsilon'))
+        np.testing.assert_allclose(self.laf3.get_wl_range(), (9493.08, 11973.9))
+
+    def test_nk_same_as_epsilon(self):
+        """quantity='nk' is another name for quantity='epsilon'."""
+        self.assertEqual(self.laf3.get_wl_range('um', 'nk'), self.laf3.get_wl_range('um', 'epsilon'))
+
+    def test_epsilon_finite_inside_range(self):
+        """get_epsilon is not nan inside get_wl_range() when k covers less than n."""
+        lo, hi = self.laf3.get_wl_range()
+        eps = self.laf3.get_epsilon(np.linspace(lo, hi, 7)[1:-1])
+        self.assertTrue(np.all(np.isfinite(eps)))
+
+    def test_epsilon_overlap_n_ends_first(self):
+        """The overlap ends where the k data ends, also for tabulated n and k."""
+        m = ri.RefractiveIndexMaterial(shelf='main', book='MoS2', page='Yim-3nm')
+        np.testing.assert_allclose(m.get_wl_range(quantity='n'), (382.417, 888.102))
+        np.testing.assert_allclose(m.get_wl_range(quantity='k'), (382.127, 887.428))
+        np.testing.assert_allclose(m.get_wl_range(), (382.417, 887.428))
+
+    def test_epsilon_without_k_is_n_range(self):
+        """Without k data, the epsilon range is the n range, as get_epsilon takes k as 0."""
+        m = ri.RefractiveIndexMaterial(shelf='main', book='BaF2', page='Malitson')
+        self.assertEqual(m.get_wl_range(), m.get_wl_range(quantity='n'))
+        with self.assertRaises(ri.NoExtinctionCoefficient):
+            m.get_wl_range(quantity='k')
+
+    def test_without_n(self):
+        """Without n data, only quantity='k' gives a range."""
+        m = ri.RefractiveIndexMaterial(shelf='main', book='BaF2', page='Bosomworth-5K')
+        np.testing.assert_allclose(m.get_wl_range(quantity='k'), (54945, 1000000))
+        for quantity in ('n', 'nk', 'epsilon'):
+            with self.assertRaisesRegex(Exception, 'No refractive index'):
+                m.get_wl_range(quantity=quantity)
+
+    def test_no_overlap(self):
+        """ValueError with both ranges when the n and k data do not overlap."""
+        m = ri.RefractiveIndexMaterial(shelf='specs', book='HIKARI-optical', page='J-SF03HS')
+        for quantity in ('nk', 'epsilon'):
+            with self.assertRaisesRegex(ValueError, r'388\.865–2058\.09 nm.*280–290 nm.*do not overlap'):
+                m.get_wl_range(quantity=quantity)
+        np.testing.assert_allclose(m.get_wl_range(quantity='n'), (388.865, 2058.09))
+        np.testing.assert_allclose(m.get_wl_range(quantity='k'), (280, 290))
+
+    def test_single_point_overlap(self):
+        """n at one wavelength inside the k range gives a range of one point."""
+        m = ri.RefractiveIndexMaterial(shelf='specs', book='SCHOTT-misc', page='DURAN')
+        np.testing.assert_allclose(m.get_wl_range(), (587.6, 587.6))
+
+    def test_table_not_in_wavelength_order(self):
+        """The range of a table is its smallest and largest wavelength, not its first and last row."""
+        m = ri.RefractiveIndexMaterial(shelf='main', book='CaMg_CO3_2', page='Querry-o')
+        np.testing.assert_allclose(m.get_wl_range(quantity='n'), (2500, 40000))
+
+    def test_finite_at_range_ends(self):
+        """The ends of get_wl_range give values, not nan, after unit conversion in both directions."""
+        # 3.3 µm -> 3300.0 nm -> 3.3000000000000003 µm, out of the table before the fix
+        au = ri.RefractiveIndexMaterial(shelf='main', book='Au', page='Yakubovsky-4nm')
+        # 1e4 µm -> 0.0223171 eV -> 1e4 µm plus some ulp
+        c = ri.RefractiveIndexMaterial(shelf='main', book='C', page='Querry-DixonKS2')
+        for m in (au, c, self.laf3):
+            for unit in ('nm', 'um', 'eV', 'cm-1'):
+                for quantity, getter in (('epsilon', m.get_epsilon),
+                                         ('n', m.get_refractive_index),
+                                         ('k', m.get_extinction_coefficient)):
+                    with self.subTest(m=m, unit=unit, quantity=quantity):
+                        ends = np.array(m.get_wl_range(unit, quantity))
+                        self.assertTrue(np.all(np.isfinite(getter(ends, unit=unit))))
+
+    def test_nan_beyond_range_ends(self):
+        """Tabulated data still gives nan just outside the range."""
+        au = ri.RefractiveIndexMaterial(shelf='main', book='Au', page='Yakubovsky-4nm')
+        lo, hi = au.get_wl_range()
+        self.assertTrue(np.all(np.isnan(au.get_epsilon([lo * (1 - 1e-6), hi * (1 + 1e-6)]))))
+
+    def test_invalid_quantity(self):
+        """ValueError for an unknown quantity."""
+        with self.assertRaisesRegex(ValueError, 'quantity must be one of'):
+            self.laf3.get_wl_range(quantity='eps')
+
+
 class TestEpsilon(unittest.TestCase):
     """Tests for dielectric permittivity calculation."""
 
