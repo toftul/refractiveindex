@@ -319,6 +319,28 @@ def _from_um(wl_um, unit):
     return from_um(wl_um)
 
 
+# Time convention for get_epsilon: exp_type -> sign s of the time dependence exp(s*i*omega*t).
+# j is the imaginary unit too, so only the sign in the string selects the convention.
+_EXP_TYPES = {
+    # exp(-iωt): epsilon = (n + ik)^2
+    "exp(-iwt)": -1,
+    "exp(-iωt)": -1,
+    "exp(-jwt)": -1,
+    "exp(-jωt)": -1,
+    "exp_minus_i_omega_t": -1,
+    # exp(+iωt): epsilon = (n - ik)^2
+    "exp(+iwt)": +1,
+    "exp(iwt)": +1,
+    "exp(+iωt)": +1,
+    "exp(iωt)": +1,
+    "exp(+jwt)": +1,
+    "exp(jwt)": +1,
+    "exp(+jωt)": +1,
+    "exp(jωt)": +1,
+    "exp_plus_i_omega_t": +1,
+}
+
+
 def _make_interpolator(wavelengths, values):
     if len(wavelengths) == 1:
         val = values[0]
@@ -440,28 +462,36 @@ class RefractiveIndexMaterial:
             raise NoExtinctionCoefficient("No extinction coefficient specified for this material")
         return self._k_func(_to_um(wavelength, unit))
 
-    def get_epsilon(self, wavelength, unit="nm", exp_type="exp_minus_i_omega_t"):
+    def get_epsilon(self, wavelength, unit="nm", exp_type="exp(-iwt)"):
         """Return complex dielectric permittivity at the given wavelength(s).
 
         Args:
             wavelength: Wavelength(s) in the specified unit.
             unit: Input unit. Supported: 'm', 'mm', 'um', 'nm' (default),
                   'A' (Angstrom), 'cm-1', 'THz', 'eV'.
-            exp_type: Time convention, 'exp_minus_i_omega_t' (default) or 'exp_plus_i_omega_t'.
+            exp_type: Time convention. j is the imaginary unit too, so only the sign selects it.
+                  exp(-iωt), result (n + ik)**2: 'exp(-iwt)' (default), 'exp(-iωt)',
+                  'exp(-jwt)', 'exp(-jωt)', 'exp_minus_i_omega_t'.
+                  exp(+iωt), result (n - ik)**2: 'exp(+iwt)', 'exp(iwt)', 'exp(+iωt)',
+                  'exp(iωt)', 'exp(+jwt)', 'exp(jwt)', 'exp(+jωt)', 'exp(jωt)',
+                  'exp_plus_i_omega_t'.
 
         Note:
             If the material has no extinction coefficient data, k is taken as 0.
         """
-        if exp_type not in ("exp_minus_i_omega_t", "exp_plus_i_omega_t"):
+        if exp_type not in _EXP_TYPES:
+            minus = [name for name, sign in _EXP_TYPES.items() if sign < 0]
+            plus = [name for name, sign in _EXP_TYPES.items() if sign > 0]
             raise ValueError(
-                f"exp_type must be 'exp_minus_i_omega_t' or 'exp_plus_i_omega_t', got {exp_type!r}"
+                f"exp_type must be one of {minus} for exp(-iωt), "
+                f"or one of {plus} for exp(+iωt), got {exp_type!r}"
             )
         n = self.get_refractive_index(wavelength, unit=unit)
         if self._k_func is None:
             k = 0.0
         else:
             k = self.get_extinction_coefficient(wavelength, unit=unit)
-        if exp_type == "exp_minus_i_omega_t":
+        if _EXP_TYPES[exp_type] < 0:
             return (n + 1j * k) ** 2
         return (n - 1j * k) ** 2
 
