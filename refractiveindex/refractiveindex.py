@@ -1,3 +1,4 @@
+import urllib.parse
 import warnings
 from pathlib import Path
 
@@ -351,6 +352,32 @@ class RefractiveIndexMaterial:
                     "wavelength (um)": wl_sample,
                     "n": _compute_formula(formula_id, coefficients, wl_sample),
                 }
+
+    @classmethod
+    def from_url(cls, url, *, db_path=None):
+        """Load the material of a refractiveindex.info page from its URL.
+
+        Copy the URL from the address bar of the browser, for example
+        https://refractiveindex.info/?shelf=main&book=SiO2&page=Malitson
+        The data comes from the database selected by db_path, not from the website.
+        """
+        query = urllib.parse.parse_qs(urllib.parse.urlsplit(url).query)
+        missing = [name for name in ("shelf", "book", "page") if name not in query]
+        if missing:
+            raise ValueError(
+                f"URL has no {', '.join(missing)} parameter{'s' if len(missing) > 1 else ''}: {url!r}. "
+                "Copy the URL from the "
+                "address bar of a material page on refractiveindex.info, for example "
+                "https://refractiveindex.info/?shelf=main&book=SiO2&page=Malitson"
+            )
+        try:
+            return cls(query["shelf"][0], query["book"][0], query["page"][0], db_path=db_path)
+        except KeyError as e:
+            raise KeyError(
+                f"{e.args[0]}. The website can have materials that are not in the database in use. "
+                "To use a newer copy, clone https://github.com/polyanskiy/refractiveindex.info-database "
+                "and pass its database/ folder as db_path="
+            ) from None
 
     def get_refractive_index(self, wavelength, unit="nm"):
         """Return refractive index n at the given wavelength(s).

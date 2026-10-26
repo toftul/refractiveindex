@@ -486,3 +486,63 @@ class TestDeprecatedArguments(unittest.TestCase):
             with self.assertWarns(DeprecationWarning):
                 with self.assertRaises(FileNotFoundError):
                     ri.RefractiveIndexMaterial(shelf='main', book='SiO', page='Hass', databasePath=tempdir)
+
+
+class TestFromUrl(unittest.TestCase):
+    """RefractiveIndexMaterial.from_url reads shelf, book and page from a refractiveindex.info URL."""
+
+    def test_same_as_constructor(self):
+        """A URL gives the same data as the constructor with its shelf, book and page."""
+        m = ri.RefractiveIndexMaterial.from_url('https://refractiveindex.info/?shelf=main&book=SiO&page=Hass')
+        ref = ri.RefractiveIndexMaterial(shelf='main', book='SiO', page='Hass')
+        self.assertEqual(m.get_refractive_index(600), ref.get_refractive_index(600))
+        self.assertEqual(m.get_extinction_coefficient(600), ref.get_extinction_coefficient(600))
+
+    def test_percent_encoded(self):
+        """Percent-encoded page names are decoded (Querry-%CE%B2 is Querry-β)."""
+        m = ri.RefractiveIndexMaterial.from_url('https://refractiveindex.info/?shelf=main&book=CaSO4&page=Querry-%CE%B2')
+        ref = ri.RefractiveIndexMaterial(shelf='main', book='CaSO4', page='Querry-β')
+        self.assertEqual(m.get_refractive_index(10000), ref.get_refractive_index(10000))
+
+    def test_other_url_forms(self):
+        """Scheme, host, parameter order and other parameters do not matter."""
+        ref = ri.RefractiveIndexMaterial(shelf='main', book='SiO2', page='Malitson')
+        for url in ('http://refractiveindex.info/?shelf=main&book=SiO2&page=Malitson',
+                    'refractiveindex.info/?shelf=main&book=SiO2&page=Malitson',
+                    'https://www.refractiveindex.info/?page=Malitson&shelf=main&book=SiO2',
+                    'https://example.org/?shelf=main&book=SiO2&page=Malitson&wavelength=0.5#chart'):
+            with self.subTest(url=url):
+                m = ri.RefractiveIndexMaterial.from_url(url)
+                self.assertEqual(m.get_refractive_index(633), ref.get_refractive_index(633))
+
+    def test_missing_parameter(self):
+        """ValueError that names the missing parameter."""
+        for url, missing in (('https://refractiveindex.info/?shelf=main&book=SiO2', 'page'),
+                             ('https://refractiveindex.info/?shelf=main&book=SiO2&page=', 'page'),
+                             ('https://refractiveindex.info/?book=SiO2&page=Malitson', 'shelf')):
+            with self.subTest(url=url):
+                with self.assertRaisesRegex(ValueError, f'no {missing} parameter'):
+                    ri.RefractiveIndexMaterial.from_url(url)
+
+    def test_data_file_link(self):
+        """Links to data files are not accepted, and the message tells to use the address bar."""
+        for url in ('https://refractiveindex.info/database/data/main/SiO2/nk/Malitson.yml',
+                    'https://refractiveindex.info/data_csv.php?datafile=database/data/main/SiO2/nk/Malitson.yml'):
+            with self.subTest(url=url):
+                with self.assertRaisesRegex(ValueError, 'address bar'):
+                    ri.RefractiveIndexMaterial.from_url(url)
+
+    def test_material_not_found(self):
+        """KeyError that tells to use a newer database with db_path."""
+        with self.assertRaisesRegex(KeyError, 'db_path'):
+            ri.RefractiveIndexMaterial.from_url('https://refractiveindex.info/?shelf=main&book=Unobtainium&page=Fake')
+
+    def test_db_path(self):
+        """db_path is given to the constructor."""
+        from refractiveindex.refractiveindex import _DEFAULT_DB_PATH
+        url = 'https://refractiveindex.info/?shelf=main&book=SiO&page=Hass'
+        m = ri.RefractiveIndexMaterial.from_url(url, db_path=str(_DEFAULT_DB_PATH))
+        self.assertAlmostEqual(m.get_refractive_index(600), 1.96553846)
+        with tempfile.TemporaryDirectory() as tempdir:
+            with self.assertRaises(FileNotFoundError):
+                ri.RefractiveIndexMaterial.from_url(url, db_path=tempdir)

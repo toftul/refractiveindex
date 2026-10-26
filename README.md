@@ -42,6 +42,18 @@ SiO.get_refractive_index(wavelengths)
 # array([2.15092857, 1.999, 1.96553846, 1.942])
 ```
 
+### Load from a URL
+
+Copy the URL from the address bar of a material page on [refractiveindex.info](https://refractiveindex.info):
+
+```python
+SiO2 = RefractiveIndexMaterial.from_url('https://refractiveindex.info/?shelf=main&book=SiO2&page=Malitson')
+SiO2.get_refractive_index(633)
+# 1.4570...
+```
+
+The data comes from the database included in the package, not from the website. If the website has a material that the included database does not have, see [Use another copy of the database](#use-another-copy-of-the-database). `from_url` also takes `db_path=`.
+
 ### Units
 
 All methods accept an optional `unit=` parameter. Default is `nm`. The following calls are all equivalent:
@@ -114,9 +126,7 @@ Notes:
 
 ## How to get material page names
 
-You can find the proper "page" name by hovering your cursor on the link in the Data section
-
-![How to get page name](./docs/images/link.png)
+Open the material page on [refractiveindex.info](https://refractiveindex.info) and copy the URL from the address bar of the browser. Give the URL to `from_url` (see [Load from a URL](#load-from-a-url)), or read the names from it: `https://refractiveindex.info/?shelf=main&book=SiO2&page=Malitson` gives `shelf='main'`, `book='SiO2'` and `page='Malitson'`.
 
 Or you can look up folders in this repository<br>
 https://github.com/polyanskiy/refractiveindex.info-database
