@@ -4,7 +4,7 @@ This file lists the changes in each release of `refractiveindex`.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 The version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.1.0] - 2026-10-26
 
 ### Added
 
@@ -177,6 +177,7 @@ The version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 - First release.
 
+[1.1.0]: https://github.com/toftul/refractiveindex/compare/v1.0.5...v1.1.0
 [1.0.5]: https://github.com/toftul/refractiveindex/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/toftul/refractiveindex/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/toftul/refractiveindex/releases/tag/v1.0.3
