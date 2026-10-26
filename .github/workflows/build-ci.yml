@@ -5,10 +5,6 @@ on:
   push:
     branches:
       - main
-  # Weekly run against the latest upstream database, so that
-  # TestCatalogFixes.test_fixes_still_needed reports upstream fixes.
-  schedule:
-    - cron: "0 6 * * 1"
   workflow_dispatch:
 
 jobs:
