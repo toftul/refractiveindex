@@ -182,4 +182,3 @@ The database is in the public domain ([CC0 1.0](https://creativecommons.org/publ
 
 1. Include EODG data
 2. Search
-3. Material from URL
