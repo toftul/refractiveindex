@@ -87,29 +87,19 @@ Every material exposes the wavelength range over which its data are defined:
 
 ```python
 # Returns (min, max) in the requested unit
-bk7.get_wl_range()            # e.g. (300.0, 2500.0)   nm
-bk7.get_wl_range(unit='um')   # e.g. (0.3, 2.5)        µm
-bk7.get_wl_range(unit='cm-1') # e.g. (4000.0, 33333.3) cm⁻¹
+bk7.get_wl_range()            # (300.0, 2500.0)   nm
+bk7.get_wl_range(unit='um')   # (0.3, 2.5)        µm
 ```
 
-Result is always returned as `(min, max)`. 
-
-The n data and the k data of a material can cover different wavelength ranges. Use `quantity` to select the range:
-
-| `quantity` | Range | Valid for |
-|---|---|---|
-| `'epsilon'` (default) or `'nk'` | Overlap of the n and k ranges. Without k data, the n range. | `get_epsilon` |
-| `'n'` | Range of the n data | `get_refractive_index` |
-| `'k'` | Range of the k data | `get_extinction_coefficient` |
-
+Sometimes n and k range is different. Use `quantity` to select the range:
 ```python
 laf3 = RefractiveIndexMaterial(shelf='main', book='LaF3', page='Amotchkina')
 laf3.get_wl_range(quantity='n')  # (400.0, 12000.0)  nm
 laf3.get_wl_range(quantity='k')  # (9493.08, 11973.9) nm
 laf3.get_wl_range()              # (9493.08, 11973.9) nm, the overlap
 ```
+You can set `quantity='nk'`, which would also mean the overlap.
 
-If the material has no data for `quantity`, `get_wl_range` raises the same exception as the matching method, for example `NoExtinctionCoefficient` for `quantity='k'`. If the n and k ranges do not overlap, it raises `ValueError`.
 
 ### Out-of-range behavior
 
