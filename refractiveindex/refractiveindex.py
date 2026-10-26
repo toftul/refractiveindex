@@ -1,4 +1,4 @@
-import sys
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -11,11 +11,9 @@ except ImportError:
     from yaml import BaseLoader
 
 
-# Default database SHA. Latest SHA will be found automatically if this is not set.
-# https://github.com/polyanskiy/refractiveindex.info-database/commits/main
-_DATABASE_SHA = None
-
-_DEFAULT_DB_PATH = Path.home() / ".refractiveindex.info-database"
+# The database included in the package. scripts/update_database.py replaces it with an
+# upstream release, and _database_version.py records which release it is.
+_DEFAULT_DB_PATH = Path(__file__).parent / "database"
 
 # Module-level cache: db_path -> {(shelf, book, page): filepath}
 _catalog_cache = {}
@@ -26,122 +24,30 @@ _catalog_cache = {}
 # to remove the entry.
 _CATALOG_FIXES = {
     # https://github.com/toftul/refractiveindex/issues/10
-    # Fixed upstream on develop (polyanskiy/refractiveindex.info-database@eb734f7a), not yet on main.
+    # Fixed upstream on develop (polyanskiy/refractiveindex.info-database@eb734f7a), not yet in a release.
     ("main", "MgO", "Synowicki"): ("main/As2S3/nk/Synowicki.yml", "main/MgO/nk/Synowicki.yml"),
     ("main", "ZrO2", "Synowicki"): ("main/As2S3/nk/Synowicki.yml", "main/ZrO2/nk/Synowicki.yml"),
 }
 
 
-def _make_ssl_context(ssl_certificate_location):
-    """Return the SSL context for the download requests, or None for the system default.
+class _Deprecated:
+    """Default value of deprecated arguments, so that passing any value can be detected."""
 
-    An empty string gives a context that does not verify certificates. A path to a .pem file
-    gives a context that trusts only that file. The context is passed to each request, so it
-    does not change the default for other HTTPS requests in the process.
-    """
-    import ssl
-
-    if ssl_certificate_location is None:
-        return None
-    if ssl_certificate_location == "":
-        return ssl._create_unverified_context()
-    if not ssl_certificate_location.endswith(".pem") or not Path(ssl_certificate_location).is_file():
-        raise ValueError(
-            f"Does not appear to be an existing .pem certificate file: {ssl_certificate_location}"
-        )
-    return ssl.create_default_context(cafile=ssl_certificate_location)
+    def __repr__(self):
+        return "<deprecated>"
 
 
-def _get_latest_commit_hash(ssl_context=None):
-    """Get the latest commit hash from the main branch of the refractiveindex.info-database repository."""
-    try:
-        # Use GitHub API to get the latest commit SHA
-        import urllib.request
-        import json
-
-        url = "https://api.github.com/repos/polyanskiy/refractiveindex.info-database/commits/main"
-        with urllib.request.urlopen(url, context=ssl_context) as response:
-            data = json.loads(response.read().decode('utf-8'))
-            return data['sha']
-    except Exception as e:
-        print(f"Failed to get latest commit hash: {e}", file=sys.stderr)
-        return None
-
-
-def _download_database(db_path, ssl_certificate_location=None, commit_hash=_DATABASE_SHA):
-    import shutil
-    import tempfile
-    import urllib.request
-    import zipfile
-
-    ssl_context = _make_ssl_context(ssl_certificate_location)
-
-    # Use provided commit hash or get the latest one
-    if commit_hash is None:
-        commit_hash = _get_latest_commit_hash(ssl_context)
-        if commit_hash is None:
-            # Fallback to a known good commit if we can't fetch the latest
-            commit_hash = "ff11b5897ef0754b15d939d921eb6c745693cbd1"
-
-    url = f"https://github.com/polyanskiy/refractiveindex.info-database/archive/{commit_hash}.zip"
-
-    with tempfile.TemporaryDirectory() as tempdir:
-        zip_path = Path(tempdir) / "db.zip"
-        print("downloading refractiveindex.info database...", file=sys.stderr)
-        with urllib.request.urlopen(url, context=ssl_context) as response, open(zip_path, "wb") as f:
-            shutil.copyfileobj(response, f)
-        print("extracting...", file=sys.stderr)
-        with zipfile.ZipFile(zip_path, "r") as zf:
-            zf.extractall(tempdir)
-
-        if db_path.is_dir():
-            print("removing old database...", file=sys.stderr)
-            shutil.rmtree(db_path)
-
-        extracted = Path(tempdir) / f"refractiveindex.info-database-{commit_hash}" / "database"
-        shutil.move(str(extracted), str(db_path))
-        
-        # Save the commit hash to version file
-        version_file = db_path / ".version"
-        with open(version_file, 'w') as f:
-            f.write(commit_hash)
-        
-        print("done", file=sys.stderr)
-
-
-def _ensure_database(db_path, auto_download, update_database, ssl_certificate_location):
-    if not db_path.exists() and auto_download or update_database:
-        _download_database(db_path, ssl_certificate_location)
-    return db_path
-
-
-def _check_for_updates(db_path, ssl_certificate_location=None):
-    """Check if there's a newer version of the database available and update if needed."""
-    try:
-        # Get the current commit hash from the database directory
-        version_file = db_path / ".version"
-        if version_file.exists():
-            with open(version_file, 'r') as f:
-                current_hash = f.read().strip()
-        else:
-            current_hash = None
-        
-        # Get the latest commit hash
-        latest_hash = _get_latest_commit_hash(_make_ssl_context(ssl_certificate_location))
-        
-        if latest_hash and (current_hash is None or current_hash != latest_hash):
-            print(f"Updating database from {current_hash or 'unknown'} to {latest_hash}", file=sys.stderr)
-            _download_database(db_path, ssl_certificate_location, commit_hash=latest_hash)
-            return True
-        return False
-    except Exception as e:
-        print(f"Failed to check for updates: {e}", file=sys.stderr)
-        return False
+_DEPRECATED = _Deprecated()
 
 
 def _read_catalog(db_path):
     """Parse catalog-nk.yml as is into {(shelf, book, page): data path relative to data/}."""
     catalog_file = db_path / "catalog-nk.yml"
+    if not catalog_file.is_file():
+        raise FileNotFoundError(
+            f"No catalog-nk.yml in {db_path}. db_path must point at the database/ folder "
+            "of refractiveindex.info-database, the folder with catalog-nk.yml and data/."
+        )
     with open(catalog_file, "rt", encoding="utf-8") as f:
         catalog = yaml.load(f, Loader=BaseLoader)
 
@@ -356,26 +262,34 @@ class RefractiveIndexMaterial:
     """Public API for looking up optical material properties.
 
     Wavelengths default to nanometers. Pass unit='um' to use micrometers.
+
+    The data comes from the database included in the package (see DATABASE_VERSION).
+    To use another copy, pass db_path= with the path of its database/ folder, the folder
+    with catalog-nk.yml and data/.
     """
 
-    def __init__(self, shelf, book, page, *,
-                 db_path=None, auto_download=True,
-                 update_database=False, ssl_certificate_location=None,
-                 # Legacy kwarg
-                 databasePath=None):
-        # Support legacy kwarg
-        if db_path is None and databasePath is not None:
-            db_path = Path(databasePath)
-        if db_path is None:
-            db_path = _DEFAULT_DB_PATH
-        else:
-            db_path = Path(db_path)
+    def __init__(self, shelf, book, page, *, db_path=None,
+                 # Deprecated since 1.2.0, to be removed in 2.0.0
+                 auto_download=_DEPRECATED, update_database=_DEPRECATED,
+                 ssl_certificate_location=_DEPRECATED, databasePath=_DEPRECATED):
+        for name, value in (("auto_download", auto_download),
+                            ("update_database", update_database),
+                            ("ssl_certificate_location", ssl_certificate_location)):
+            if value is not _DEPRECATED:
+                warnings.warn(
+                    f"{name} has no effect since refractiveindex 1.2.0 and will be removed in 2.0.0. "
+                    "The database is part of the package. To use another copy, pass db_path=.",
+                    DeprecationWarning, stacklevel=2,
+                )
+        if databasePath is not _DEPRECATED:
+            warnings.warn(
+                "databasePath will be removed in refractiveindex 2.0.0. Use db_path= instead.",
+                DeprecationWarning, stacklevel=2,
+            )
+            if db_path is None:
+                db_path = databasePath
 
-        _ensure_database(db_path, auto_download, update_database, ssl_certificate_location)
-        
-        # Check for updates if requested
-        if update_database:
-            _check_for_updates(db_path, ssl_certificate_location)
+        db_path = _DEFAULT_DB_PATH if db_path is None else Path(db_path)
         catalog = _load_catalog(db_path)
 
         key = (shelf, book, page)
