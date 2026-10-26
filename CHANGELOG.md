@@ -6,6 +6,18 @@ The version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `get_epsilon` accepts `exp_type="exp(-iwt)"` and `exp_type="exp(+iwt)"`.
+  It also accepts `"exp(iwt)"`, `j` instead of `i`, and `ω` instead of `w`, for example `"exp(-jωt)"`.
+  `j` is the imaginary unit, so only the sign in the string selects the convention.
+  The old names `"exp_minus_i_omega_t"` and `"exp_plus_i_omega_t"` continue to work.
+
+### Changed
+
+- The default value of `exp_type` is now `"exp(-iwt)"`.
+  It has the same meaning as the old default `"exp_minus_i_omega_t"`, so the result does not change.
+
 ### Fixed
 
 - `ssl_certificate_location` with a path to a `.pem` file now works.

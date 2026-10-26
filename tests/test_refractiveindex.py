@@ -364,8 +364,37 @@ class TestEpsilon(unittest.TestCase):
     def test_epsilon_invalid_exp_type(self):
         """ValueError for an unknown exp_type, so a typo cannot flip the sign of Im(epsilon)."""
         m = ri.RefractiveIndexMaterial(shelf='main', book='Ag', page='Johnson')
-        with self.assertRaises(ValueError):
-            m.get_epsilon(500, exp_type='exp_minus_iwt')
+        # Only exact spellings are accepted.
+        for exp_type in ('exp_minus_iwt', 'exp(-iwt )', 'EXP(-iwt)'):
+            with self.subTest(exp_type=exp_type):
+                with self.assertRaises(ValueError):
+                    m.get_epsilon(500, exp_type=exp_type)
+
+    def test_epsilon_all_exp_types(self):
+        """Every accepted exp_type gives (n + ik)^2 or (n - ik)^2, as selected by its sign."""
+        from refractiveindex.refractiveindex import _EXP_TYPES
+        minus = ['exp(-iwt)', 'exp(-iωt)', 'exp(-jwt)', 'exp(-jωt)', 'exp_minus_i_omega_t']
+        plus = ['exp(+iwt)', 'exp(iwt)', 'exp(+iωt)', 'exp(iωt)',
+                'exp(+jwt)', 'exp(jwt)', 'exp(+jωt)', 'exp(jωt)', 'exp_plus_i_omega_t']
+        self.assertEqual(set(_EXP_TYPES), set(minus + plus))
+
+        m = ri.RefractiveIndexMaterial(shelf='main', book='Ag', page='Johnson')
+        wl = 500
+        n = m.get_refractive_index(wl)
+        k = m.get_extinction_coefficient(wl)
+        for exp_type in minus:
+            with self.subTest(exp_type=exp_type):
+                self.assertAlmostEqual(m.get_epsilon(wl, exp_type=exp_type), (n + 1j * k) ** 2)
+        for exp_type in plus:
+            with self.subTest(exp_type=exp_type):
+                self.assertAlmostEqual(m.get_epsilon(wl, exp_type=exp_type), (n - 1j * k) ** 2)
+
+    def test_epsilon_default_exp_type(self):
+        """The default exp_type gives the same result as 'exp(-iwt)' and 'exp_minus_i_omega_t'."""
+        m = ri.RefractiveIndexMaterial(shelf='main', book='Ag', page='Johnson')
+        eps = m.get_epsilon(500)
+        self.assertEqual(eps, m.get_epsilon(500, exp_type='exp(-iwt)'))
+        self.assertEqual(eps, m.get_epsilon(500, exp_type='exp_minus_i_omega_t'))
 
 
 class TestCatalogFixes(unittest.TestCase):
