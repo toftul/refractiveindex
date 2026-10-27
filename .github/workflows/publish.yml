@@ -24,6 +24,12 @@ jobs:
             echo "::error::Release tag ($TAG_VERSION) does not match pyproject.toml version ($PKG_VERSION)"
             exit 1
           fi
+          CFF_VERSION="$(sed -n 's/^version: *//p' CITATION.cff)"
+          echo "CITATION.cff version: $CFF_VERSION"
+          if [ "$TAG_VERSION" != "$CFF_VERSION" ]; then
+            echo "::error::Release tag ($TAG_VERSION) does not match CITATION.cff version ($CFF_VERSION)"
+            exit 1
+          fi
 
       - name: Build
         run: |

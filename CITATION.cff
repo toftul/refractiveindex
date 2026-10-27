@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+message: >-
+  If you use this package, please cite it and the refractiveindex.info
+  database paper (Polyanskiy 2024), and state the database version
+  (refractiveindex.DATABASE_VERSION).
+type: software
+title: "refractiveindex: Python interface to the refractiveindex.info database"
+abstract: >-
+  Python interface to the refractiveindex.info database. Gives the refractive
+  index, extinction coefficient and permittivity of optical materials. The
+  database is included in the package.
+authors:
+  - family-names: Toftul
+    given-names: Ivan
+    orcid: "https://orcid.org/0000-0003-3588-5403"
+  - name: "refractiveindex contributors"
+    website: "https://github.com/toftul/refractiveindex/graphs/contributors"
+version: 1.3.1
+date-released: 2026-10-27
+license: MIT
+repository-code: "https://github.com/toftul/refractiveindex"
+keywords:
+  - optics
+  - refractive index
+  - photonics
+  - materials
+  - refractiveindex.info
+references:
+  - type: article
+    title: "Refractiveindex.info database of optical constants"
+    authors:
+      - family-names: Polyanskiy
+        given-names: Mikhail N.
+    journal: "Scientific Data"
+    volume: 11
+    start: 94
+    year: 2024
+    doi: 10.1038/s41597-023-02898-2

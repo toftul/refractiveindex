@@ -4,6 +4,14 @@ This file lists the changes in each release of `refractiveindex`.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 The version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2026-10-27
+
+### Added
+
+- `CITATION.cff` with the citation for this package and for the database paper.
+  GitHub shows it as "Cite this repository".
+  Zenodo archives each release from this version on and gives it a DOI.
+
 ## [1.3.0] - 2026-10-27
 
 ### Added
@@ -247,7 +255,8 @@ The version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 - First release.
 
-[Unreleased]: https://github.com/toftul/refractiveindex/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/toftul/refractiveindex/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/toftul/refractiveindex/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/toftul/refractiveindex/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/toftul/refractiveindex/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/toftul/refractiveindex/compare/v1.0.5...v1.1.0

@@ -50,9 +50,9 @@ See [DOCUMENTATION.md](https://github.com/toftul/refractiveindex/blob/main/DOCUM
 
 ## How to cite
 
-Respect the maintainer of the upstream database. Cite as
+If you use this package in published work, please cite the database paper and this package, and state the database version.
 
-**Reference:**
+**Database:**
 
 > Polyanskiy, M. N. *Refractiveindex.info database of optical constants*.  
 > *Scientific Data* **11**, 94 (2024).  
@@ -71,9 +71,26 @@ Respect the maintainer of the upstream database. Cite as
 }
 ```
 
-Please also state the database version for reproducibility. The database is [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+**This package:**
+
+> Toftul, I. and refractiveindex contributors. *refractiveindex: Python interface to the refractiveindex.info database*.  
+> https://github.com/toftul/refractiveindex
+
+```bibtex
+@software{toftul_refractiveindex,
+  author = {Toftul, Ivan and {refractiveindex contributors}},
+  title  = {refractiveindex: Python interface to the refractiveindex.info database},
+  url    = {https://github.com/toftul/refractiveindex}
+}
+```
+
+The "Cite this repository" button on GitHub gives the same entry in APA and BibTeX, from [CITATION.cff](https://github.com/toftul/refractiveindex/blob/main/CITATION.cff).
+
+For reproducibility, add the package version and the database version. The database is [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
 ```python
-print(ri.DATABASE_VERSION)  
+from importlib.metadata import version
+print(version('refractiveindex'))
+print(ri.DATABASE_VERSION)
 print(ri.DATABASE_COMMIT)
 ```
 
