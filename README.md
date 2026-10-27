@@ -47,12 +47,29 @@ SiO.get_wl_range(unit='nm')          # (240.0, 14000.0)
 
 See [DOCUMENTATION.md](https://github.com/toftul/refractiveindex/blob/main/DOCUMENTATION.md) for unit conversions, separate n and k ranges, values outside the range, and other copies of the database.
 
-## Citation
 
+## How to cite
 
-M. N. Polyanskiy, "Refractiveindex.info database of optical constants," *Scientific Data* **11**, 94 (2024). https://doi.org/10.1038/s41597-023-02898-2
+Respect the maintainer of the upstream database. Cite as
 
+**Reference:**
 
+> Polyanskiy, M. N. *Refractiveindex.info database of optical constants*.  
+> *Scientific Data* **11**, 94 (2024).  
+> https://doi.org/10.1038/s41597-023-02898-2
+
+**BibTeX:**
+```bibtex
+@article{polyanskiy2024,
+  title   = {Refractiveindex.info database of optical constants},
+  author  = {Polyanskiy, Mikhail N.},
+  journal = {Scientific Data},
+  volume  = {11},
+  pages   = {94},
+  year    = {2024},
+  doi     = {10.1038/s41597-023-02898-2}
+}
+```
 
 Please also state the database version for reproducibility. The database is [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
 ```python
