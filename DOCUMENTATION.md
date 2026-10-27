@@ -65,7 +65,7 @@ The default time dependence is $\mathrm{e}^{-\mathrm{i} \omega t}$, so $\varepsi
 
 ## Material names
 
-- Spaces in names become underscores: `page='Rodriguez-de_Marcos'`, not `page='Rodriguez-de Marcos'`.
+- A space and an underscore in `shelf`, `book` and `page` count as the same, so `page='Rodriguez-de Marcos'` loads `Rodriguez-de_Marcos`. Most ids in the catalog have underscores for spaces; the few with spaces, such as `organic/C2ClF3_n - polychlorotrifluoroethylene`, load with either spelling.
 - The address-bar URL `https://refractiveindex.info/?shelf=main&book=SiO2&page=Malitson` gives `shelf='main'`, `book='SiO2'`, `page='Malitson'`. `from_url` reads these three names and nothing else; other URLs, such as links to data files, raise `ValueError`.
 - You can also find the names with `ri.search` (see below), or in the folders of the [upstream repository](https://github.com/polyanskiy/refractiveindex.info-database).
 
@@ -116,7 +116,7 @@ ri.search('gold', quantity='k', wavelength=1.55, unit='um')
 ri.search(shelf='glass')                                 # without a query, all pages that the filters keep
 ```
 
-`shelf` and `book` are exact ids, so an unknown id raises `ValueError`. No matches give an empty list. Some data is on more than one shelf, for example `glass/fused_silica/Malitson` and `main/SiO2/Malitson`. Search shows each of these pages.
+`shelf` and `book` are exact ids (a space and an underscore count as the same), so an unknown id raises `ValueError`. No matches give an empty list. Some data is on more than one shelf, for example `glass/fused_silica/Malitson` and `main/SiO2/Malitson`. Search shows each of these pages.
 
 For `quantity` and `wavelength`, search loads each matching page. A page whose data cannot be loaded is left out, with a `UserWarning` that names it.
 

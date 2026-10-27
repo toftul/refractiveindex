@@ -20,6 +20,9 @@ The version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.
   and `ri.search('SiO2')[0].material()` loads one.
 - `RefractiveIndexMaterial` prints as the code that loads it,
   for example `RefractiveIndexMaterial(shelf='main', book='SiO2', page='Malitson')`.
+- A space and an underscore in `shelf`, `book` and `page` count as the same,
+  so `page='Rodriguez-de Marcos'` loads `main/SiO2/Rodriguez-de_Marcos`. Before this change, it raised `KeyError`.
+  This also applies to `from_url`, where `+` is a space, and to `search(shelf=..., book=...)`.
 
 ### Changed
 

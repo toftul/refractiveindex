@@ -13,7 +13,7 @@ pip install refractiveindex
 ```python
 import refractiveindex as ri
 
-# load a material by shelf, book and page (replace spaces with underscores)
+# load a material by shelf, book and page
 SiO = ri.RefractiveIndexMaterial(shelf='main', book='SiO', page='Hass')
 # or from the address-bar URL of a refractiveindex.info page
 SiO2 = ri.RefractiveIndexMaterial.from_url(

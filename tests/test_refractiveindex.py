@@ -925,3 +925,37 @@ class TestMaterialRepr(unittest.TestCase):
         m = ri.RefractiveIndexMaterial.from_url('https://refractiveindex.info/?shelf=main&book=CaSO4&page=Querry-%CE%B2')
         self.assertEqual(repr(m), "RefractiveIndexMaterial(shelf='main', book='CaSO4', page='Querry-β')")
 
+
+class TestSpacesInIds(unittest.TestCase):
+    """A space and an underscore in shelf, book and page ids count as the same."""
+
+    def test_space_for_underscore(self):
+        """page='Rodriguez-de Marcos' loads Rodriguez-de_Marcos."""
+        m = ri.RefractiveIndexMaterial(shelf='main', book='SiO2', page='Rodriguez-de Marcos')
+        ref = ri.RefractiveIndexMaterial(shelf='main', book='SiO2', page='Rodriguez-de_Marcos')
+        self.assertEqual(m.get_refractive_index(500), ref.get_refractive_index(500))
+        self.assertEqual(repr(m), "RefractiveIndexMaterial(shelf='main', book='SiO2', page='Rodriguez-de_Marcos')")
+
+    def test_ids_with_spaces(self):
+        """Ids that have spaces in the catalog load with spaces or with underscores."""
+        book = 'C2ClF3_n - polychlorotrifluoroethylene'
+        for written in (book, book.replace(' ', '_')):
+            with self.subTest(book=written):
+                m = ri.RefractiveIndexMaterial(shelf='organic', book=written, page='Smith')
+                self.assertEqual(repr(m), f"RefractiveIndexMaterial(shelf='organic', book={book!r}, page='Smith')")
+
+    def test_from_url_plus(self):
+        """A + in a URL is a space, so it loads the page with an underscore."""
+        m = ri.RefractiveIndexMaterial.from_url('https://refractiveindex.info/?shelf=main&book=SiO2&page=Rodriguez-de+Marcos')
+        self.assertEqual(m._key, ('main', 'SiO2', 'Rodriguez-de_Marcos'))
+
+    def test_not_found(self):
+        """Other differences still raise KeyError."""
+        with self.assertRaises(KeyError):
+            ri.RefractiveIndexMaterial(shelf='main', book='SiO2', page='Rodriguez de Marcos')
+
+    def test_search_shelf_and_book(self):
+        """search(book=) and search(shelf=) accept spaces for underscores too."""
+        self.assertEqual(ri.search(shelf='glass', book='fused silica'), ri.search(shelf='glass', book='fused_silica'))
+        self.assertTrue(ri.search(shelf='popular glass'))
+        self.assertTrue(ri.search(book='C2ClF3_n_-_polychlorotrifluoroethylene'))

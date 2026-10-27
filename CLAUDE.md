@@ -40,7 +40,7 @@ Internally, wavelengths are converted from nm to μm (divided by 1000) at the pu
 
 ## Key Conventions
 
-- Spaces in material page names must be replaced with underscores (e.g., `Rodriguez-de_Marcos` not `Rodriguez-de Marcos`).
+- A space and an underscore in ids count as the same (`_underscored`): the constructor tries the exact key first, then compares with spaces as underscores, because a few book ids really contain spaces (e.g. `organic/C2ClF3_n - polychlorotrifluoroethylene`). `search(shelf=, book=)` compares the same way. No id contains `/`.
 - Time dependence convention: e^{-iωt}, so Im(ε) > 0 means lossy.
 - All `tabulated n/k/nk` and `formula 1-9` data types are supported.
 - Public exports: `RefractiveIndexMaterial`, `NoExtinctionCoefficient`, `search`, `DATABASE_VERSION` and `DATABASE_COMMIT` (see `__init__.py`).

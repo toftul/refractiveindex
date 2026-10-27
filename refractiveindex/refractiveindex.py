@@ -58,6 +58,11 @@ def _strip_html(text):
     return re.sub(r"<[^>]+>", "", text)
 
 
+def _underscored(name):
+    """A shelf, book or page id with spaces as underscores, to compare ids written either way."""
+    return str(name).replace(" ", "_")
+
+
 def _read_catalog(db_path):
     """Parse catalog-nk.yml as is into {(shelf, book, page): _CatalogEntry}.
 
@@ -319,6 +324,9 @@ class RefractiveIndexMaterial:
 
     Wavelengths default to nanometers. Pass unit='um' to use micrometers.
 
+    A space and an underscore in shelf, book and page count as the same, so
+    page='Rodriguez-de Marcos' loads 'Rodriguez-de_Marcos'.
+
     The data comes from the database included in the package (see DATABASE_VERSION).
     To use another copy, pass db_path= with the path of its database/ folder, the folder
     with catalog-nk.yml and data/.
@@ -350,7 +358,12 @@ class RefractiveIndexMaterial:
 
         key = (shelf, book, page)
         if key not in catalog:
-            raise KeyError(f"Material not found: shelf={shelf!r}, book={book!r}, page={page!r}")
+            # Most ids have underscores for spaces, but a few have spaces, so compare both ways
+            wanted = tuple(map(_underscored, key))
+            found = [k for k in catalog if tuple(map(_underscored, k)) == wanted]
+            if not found:
+                raise KeyError(f"Material not found: shelf={shelf!r}, book={book!r}, page={page!r}")
+            key = found[0]
         filepath = catalog[key].path
         self._key = key
         self._db_path = db_path
@@ -594,13 +607,16 @@ class _SearchResults(list):
 
 
 def _search_ids(value, name, catalog_ids):
-    """The ids given as shelf= or book= of search(), as a set. None if not given."""
+    """The catalog ids given as shelf= or book= of search(), as a set. None if not given."""
     if value is None:
         return None
     ids = [value] if isinstance(value, str) else list(value)
     valid = dict.fromkeys(catalog_ids)
+    found = set()
     for id_ in ids:
-        if id_ in valid:
+        same = [v for v in valid if _underscored(v) == _underscored(id_)]
+        if same:
+            found.update(same)
             continue
         if name == "shelf":
             hint = f" Shelves: {', '.join(map(repr, valid))}."
@@ -609,7 +625,7 @@ def _search_ids(value, name, catalog_ids):
                      or difflib.get_close_matches(str(id_), valid, n=3))
             hint = f" Did you mean {' or '.join(map(repr, close))}?" if close else ""
         raise ValueError(f"No {name} {id_!r} in the catalog.{hint}")
-    return set(ids)
+    return found
 
 
 def _search_tier(words, book, page, entry):
@@ -644,8 +660,9 @@ def search(query=None, *, shelf=None, book=None, quantity=None, wavelength=None,
         query: Words to find, for example 'SiO2', 'silica' or 'SiO2 Malitson'. Each word must
               appear, ignoring case, in the book or page id, the book or page name, or the
               divider above the page in its book. None (default) finds every page.
-        shelf: Shelf id or a list of them, for example 'main'. Exact and case-sensitive.
-        book: Book id or a list of them, for example 'SiO2'. Exact and case-sensitive.
+        shelf: Shelf id or a list of them, for example 'main'.
+        book: Book id or a list of them, for example 'SiO2'. Ids of shelf and book are exact
+              and case-sensitive, but a space and an underscore count as the same.
         quantity: Keep only the pages that have this data, as in get_wl_range: 'n', 'k',
               or 'epsilon' or 'nk', which need n data only. A page is kept if
               get_wl_range(quantity=quantity) gives a range.
