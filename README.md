@@ -1,6 +1,7 @@
 # Python interface to RefractiveIndex database
 
 ![Tests](https://github.com/toftul/refractiveindex/actions/workflows/build-ci.yml/badge.svg)
+[![DOI](https://zenodo.org/badge/626260617.svg)](https://doi.org/10.5281/zenodo.23682585)
 
 Python interface to the [refractiveindex.info database](https://github.com/polyanskiy/refractiveindex.info-database). The database (~15 MB) is bundled. Install with
 
@@ -74,16 +75,18 @@ If you use this package in published work, please cite the database paper and th
 **This package:**
 
 > Toftul, I. and refractiveindex contributors. *refractiveindex: Python interface to the refractiveindex.info database*.  
-> https://github.com/toftul/refractiveindex
+> Zenodo. https://doi.org/10.5281/zenodo.23682585
 
 ```bibtex
 @software{toftul_refractiveindex,
   author = {Toftul, Ivan and {refractiveindex contributors}},
   title  = {refractiveindex: Python interface to the refractiveindex.info database},
+  doi    = {10.5281/zenodo.23682585},
   url    = {https://github.com/toftul/refractiveindex}
 }
 ```
 
+This DOI is for all versions and points to the latest one. The [Zenodo record](https://doi.org/10.5281/zenodo.23682585) also gives a DOI for each version.
 The "Cite this repository" button on GitHub gives the same entry in APA and BibTeX, from [CITATION.cff](https://github.com/toftul/refractiveindex/blob/main/CITATION.cff).
 
 For reproducibility, add the package version and the database version. The database is [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
