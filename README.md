@@ -22,8 +22,10 @@ SiO2 = ri.RefractiveIndexMaterial.from_url(
 
 # wavelength in nm by default
 SiO.get_refractive_index(600)        # 1.9655
+
 # unit= accepts 'nm', 'um', 'mm', 'm', 'A', 'cm-1', 'THz', 'eV'; arrays work too
 SiO.get_extinction_coefficient([0.6, 0.7], unit='um')  # array([0.001, 0.00075])
+
 # permittivity for exp(-iωt) (default) or exp(+iωt) time dependence
 SiO.get_epsilon(600)                        # (3.8633+0.0039j)
 SiO.get_epsilon(600, exp_type='exp(+iwt)')  # (3.8633-0.0039j)
@@ -38,7 +40,10 @@ See [DOCUMENTATION.md](https://github.com/toftul/refractiveindex/blob/main/DOCUM
 
 ## Citation
 
+
 M. N. Polyanskiy, "Refractiveindex.info database of optical constants," *Scientific Data* **11**, 94 (2024). https://doi.org/10.1038/s41597-023-02898-2
+
+
 
 Please also state the database version for reproducibility. The database is [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
 ```python
