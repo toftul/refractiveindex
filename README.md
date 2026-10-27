@@ -86,9 +86,6 @@ If you use this package in published work, please cite the database paper and th
 }
 ```
 
-This DOI is for all versions and points to the latest one. The [Zenodo record](https://doi.org/10.5281/zenodo.23682585) also gives a DOI for each version.
-The "Cite this repository" button on GitHub gives the same entry in APA and BibTeX, from [CITATION.cff](https://github.com/toftul/refractiveindex/blob/main/CITATION.cff).
-
 For reproducibility, add the package version and the database version. The database is [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
 ```python
 from importlib.metadata import version
