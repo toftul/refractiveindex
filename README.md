@@ -20,6 +20,15 @@ SiO2 = ri.RefractiveIndexMaterial.from_url(
     'https://refractiveindex.info/?shelf=main&book=SiO2&page=Malitson'
 )
 
+# find names, best match first
+ri.search('SiO2')
+#  0  main/SiO2/Malitson                       Malitson 1965: n 0.21–6.7 µm [Fused silica]
+#  1  main/SiO2/Nyakuchena                     Nyakuchena et al. 2023: n 1.10–1.65 µm [Fused silica]
+#  ...
+# only pages with k data that covers 1550 nm
+ri.search('SiO2', quantity='k', wavelength=1550)
+SiO2 = ri.search('SiO2')[0].material()
+
 # wavelength in nm by default
 SiO.get_refractive_index(600)        # 1.9655
 

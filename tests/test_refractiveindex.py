@@ -511,7 +511,7 @@ class TestCatalogFixes(unittest.TestCase):
         catalog = _read_catalog(_DEFAULT_DB_PATH)
         for key, (bad_path, _) in _CATALOG_FIXES.items():
             self.assertEqual(
-                catalog.get(key), bad_path,
+                catalog[key].path if key in catalog else None, bad_path,
                 f"Upstream catalog no longer has {bad_path!r} for {key}. "
                 f"Remove this entry from _CATALOG_FIXES in refractiveindex.py.",
             )
@@ -641,3 +641,287 @@ class TestFromUrl(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             with self.assertRaises(FileNotFoundError):
                 ri.RefractiveIndexMaterial.from_url(url, db_path=tempdir)
+
+
+# A small database: HTML in names, a page listed twice under two dividers, and a missing data file
+_TEST_CATALOG = """\
+- DIVIDER: "Research data"
+- SHELF: main
+  name: "MAIN - test"
+  content:
+    - BOOK: X2
+      name: "X<sub>2</sub> (Test material)"
+      content:
+        - DIVIDER: "First"
+        - PAGE: Good
+          name: "Good 2020: n,k 0.4–0.8 µm"
+          data: main/X2/Good.yml
+        - PAGE: Broken
+          name: "Broken 2021: n 0.4–0.8 µm"
+          data: main/X2/Missing.yml
+        - DIVIDER: "Second"
+        - PAGE: Good
+          name: "Good 2020: n,k 0.4–0.8 µm"
+          data: main/X2/Good.yml
+"""
+
+_TEST_DATA = """\
+DATA:
+  - type: tabulated nk
+    data: |
+        0.4 1.5 0.1
+        0.8 1.4 0.2
+"""
+
+
+class TestSearch(unittest.TestCase):
+    """ri.search finds pages by text, shelf, book, quantity and wavelength."""
+
+    def test_exact_book_first(self):
+        """The pages of the book whose id is the query come first, in catalog order."""
+        hits = ri.search('SiO2')
+        book = ri.search(shelf='main', book='SiO2')
+        self.assertEqual((hits[0].shelf, hits[0].book, hits[0].page), ('main', 'SiO2', 'Malitson'))
+        self.assertEqual(list(hits[:len(book)]), list(book))
+
+    def test_every_word_matches(self):
+        """Each query word is in the book or page id, the book or page name, or the divider."""
+        for query in ('SiO2', 'silica', 'SiO2 Malitson', 'Ciesielski Ag'):
+            hits = ri.search(query)
+            with self.subTest(query=query):
+                self.assertTrue(hits)
+                for m in hits:
+                    text = ' '.join((m.book, m.page, m.book_name, m.name, m.divider or '')).lower()
+                    for word in query.lower().split():
+                        self.assertIn(word, text)
+
+    def test_several_words(self):
+        """Several words must all match."""
+        hits = ri.search('SiO2 Malitson')
+        self.assertIn(('main', 'SiO2', 'Malitson'), [(m.shelf, m.book, m.page) for m in hits])
+        self.assertNotIn('Nyakuchena', [m.page for m in hits])
+
+    def test_ignores_case(self):
+        """The query ignores case."""
+        self.assertEqual(ri.search('sio2'), ri.search('SiO2'))
+
+    def test_ranking(self):
+        """Exact book id, then a word of the book name, then part of the book id, then the rest."""
+        from refractiveindex.refractiveindex import _DEFAULT_DB_PATH, _load_catalog, _search_tier
+        catalog = _load_catalog(_DEFAULT_DB_PATH)
+        for query in ('SiO2', 'silica', 'Si', 'gold', 'BK7'):
+            words = query.lower().split()
+            tiers = [_search_tier(words, m.book, m.page, catalog[m.shelf, m.book, m.page])
+                     for m in ri.search(query)]
+            with self.subTest(query=query):
+                self.assertEqual(tiers, sorted(tiers))
+        # Silica is a word of the book name of SiO2. Bi12SiO20 has SiO2 in its book id only.
+        self.assertEqual(ri.search('silica')[0].book, 'SiO2')
+        books = [m.book for m in ri.search('SiO2')]
+        self.assertLess(books.index('Bi12SiO20'), books.index('Ag'))
+
+    def test_shelf_and_book(self):
+        """shelf= and book= are exact ids, alone or in a list."""
+        self.assertTrue(all(m.shelf == 'glass' for m in ri.search(shelf='glass')))
+        self.assertEqual({m.book for m in ri.search(shelf='main', book=['SiO2', 'SiO'])}, {'SiO2', 'SiO'})
+        self.assertEqual({m.shelf for m in ri.search('Malitson', shelf=('main', 'glass'))}, {'main', 'glass'})
+
+    def test_unknown_shelf_or_book(self):
+        """ValueError that lists the shelves, or suggests a book id."""
+        with self.assertRaisesRegex(ValueError, r"No shelf 'mian'.*'main'"):
+            ri.search(shelf='mian')
+        with self.assertRaisesRegex(ValueError, r"No book 'sio2'.*Did you mean 'SiO2'"):
+            ri.search(book='sio2')
+        with self.assertRaisesRegex(ValueError, r"No book 'SiO3'"):
+            ri.search(book=['SiO2', 'SiO3'])
+
+    def test_quantity(self):
+        """quantity= keeps the pages for which get_wl_range(quantity=...) gives a range."""
+        pages = lambda **kwargs: {m.page for m in ri.search(shelf='main', book='BaF2', **kwargs)}
+        self.assertIn('Bosomworth-5K', pages(quantity='k'))
+        self.assertNotIn('Malitson', pages(quantity='k'))
+        self.assertIn('Malitson', pages(quantity='n'))
+        self.assertNotIn('Bosomworth-5K', pages(quantity='n'))
+        self.assertEqual(pages(quantity='epsilon'), pages(quantity='nk'))
+        # The n and k data of J-SF03HS do not overlap
+        self.assertEqual(ri.search('J-SF03HS', shelf='specs', quantity='epsilon'), [])
+        self.assertEqual(len(ri.search('J-SF03HS', shelf='specs', quantity='k')), 1)
+
+    def test_wavelength(self):
+        """wavelength= keeps the pages whose range contains it, ends included."""
+        for wavelength in (1550, 400, (400, 800), (800, 400)):
+            for quantity in (None, 'n', 'k'):
+                with self.subTest(wavelength=wavelength, quantity=quantity):
+                    hits = ri.search('SiO2', wavelength=wavelength, quantity=quantity)
+                    for m in hits:
+                        lo, hi = m.material().get_wl_range(quantity=quantity or 'epsilon')
+                        self.assertTrue(lo * (1 - 1e-9) <= np.min(wavelength))
+                        self.assertTrue(np.max(wavelength) <= hi * (1 + 1e-9))
+        pages = lambda wavelength: [m.page for m in ri.search('SiO2', shelf='main', wavelength=wavelength)]
+        # Malitson: 0.21–6.7 µm
+        self.assertIn('Malitson', pages(6700))
+        self.assertIn('Malitson', pages(210))
+        self.assertNotIn('Malitson', pages(6701))
+        self.assertNotIn('Malitson', pages((200, 300)))
+        self.assertEqual(pages((800, 400)), pages((400, 800)))
+
+    def test_wavelength_default_quantity_is_epsilon(self):
+        """Without quantity=, wavelength= uses the range of get_wl_range(), the overlap of n and k."""
+        # LaF3/Amotchkina: n 400–12000 nm, k 9493.08–11973.9 nm
+        self.assertEqual(ri.search('Amotchkina', book='LaF3', wavelength=1000), [])
+        self.assertEqual(len(ri.search('Amotchkina', book='LaF3', wavelength=1000, quantity='n')), 1)
+        self.assertEqual(len(ri.search('Amotchkina', book='LaF3', wavelength=10000)), 1)
+
+    def test_wavelength_unit(self):
+        """unit= gives the unit of wavelength, and reciprocal units can be in either order."""
+        from refractiveindex.refractiveindex import _hc_eV_um
+        nm = ri.search('SiO2', wavelength=(_hc_eV_um / 3 * 1000, _hc_eV_um / 1 * 1000))
+        self.assertTrue(nm)
+        self.assertEqual(ri.search('SiO2', wavelength=(1, 3), unit='eV'), nm)
+        self.assertEqual(ri.search('SiO2', wavelength=(3, 1), unit='eV'), nm)
+        self.assertEqual(ri.search('SiO2', wavelength=1.55, unit='um'), ri.search('SiO2', wavelength=1550))
+
+    def test_invalid_arguments(self):
+        """ValueError for an unknown quantity or unit, also without wavelength, and for a bad wavelength."""
+        with self.assertRaisesRegex(ValueError, 'quantity must be one of'):
+            ri.search('SiO2', quantity='eps')
+        with self.assertRaisesRegex(ValueError, 'unit must be one of'):
+            ri.search('SiO2', unit='nanometer')
+        with self.assertRaisesRegex(ValueError, 'number or a'):
+            ri.search('SiO2', wavelength=(400, 600, 800))
+
+    def test_no_query(self):
+        """Without a query, every page passes; without any argument, search gives all pages."""
+        from refractiveindex.refractiveindex import _DEFAULT_DB_PATH, _load_catalog
+        self.assertEqual(len(ri.search()), len(_load_catalog(_DEFAULT_DB_PATH)))
+        self.assertEqual(len(ri.search(shelf='main', book='SiO2')), len(ri.search('SiO2', book='SiO2')))
+
+    def test_no_matches(self):
+        """No matches gives an empty list that prints as No matches."""
+        hits = ri.search('Unobtainium')
+        self.assertEqual(hits, [])
+        self.assertEqual(repr(hits), 'No matches')
+
+    def test_duplicates_shown(self):
+        """Pages with the same data file on other shelves are all shown."""
+        keys = [(m.shelf, m.book) for m in ri.search('Malitson 1965', book=['SiO2', 'fused_silica'])]
+        self.assertIn(('main', 'SiO2'), keys)
+        self.assertIn(('glass', 'fused_silica'), keys)
+
+    def test_no_runtime_warning(self):
+        """Filters do not give the RuntimeWarning of formulas that the constructor samples."""
+        with warnings.catch_warnings():
+            warnings.simplefilter('error', RuntimeWarning)
+            self.assertTrue(ri.search(shelf='main', book=['GaSe', 'CS2'], quantity='n'))
+
+    def test_match(self):
+        """A match prints as Match and loads its page with material()."""
+        m = ri.search('SiO2')[0]
+        self.assertTrue(repr(m).startswith("Match(shelf='main', book='SiO2', page='Malitson', "))
+        self.assertEqual(m.book_name, 'SiO2 (Silicon dioxide, Silica, Quartz)')
+        self.assertEqual(m.divider, 'Fused silica')
+        ref = ri.RefractiveIndexMaterial(shelf='main', book='SiO2', page='Malitson')
+        self.assertEqual(m.material().get_refractive_index(633), ref.get_refractive_index(633))
+        self.assertEqual(hash(m), hash(ri.search('SiO2')[0]))
+
+
+class TestSearchPrint(unittest.TestCase):
+    """The list from ri.search prints one line per match: index, shelf/book/page, name [divider]."""
+
+    def test_lines(self):
+        """Line i is i, shelf/book/page of hits[i], and its name with the divider in brackets."""
+        hits = ri.search('SiO2')
+        lines = repr(hits).splitlines()
+        self.assertEqual(len(lines), len(hits))
+        path_width = max(len(f'{m.shelf}/{m.book}/{m.page}') for m in hits)
+        for i, (line, m) in enumerate(zip(lines, hits)):
+            with self.subTest(line=line):
+                number, rest = line.split('  ', 1)
+                self.assertEqual(int(number), i)
+                # The names line up after the longest path
+                self.assertEqual(rest[:path_width].rstrip(), f'{m.shelf}/{m.book}/{m.page}')
+                description = m.name if m.divider is None else f'{m.name} [{m.divider}]'
+                self.assertEqual(rest[path_width:], '  ' + description)
+        self.assertEqual(lines[0].split(), ['0', 'main/SiO2/Malitson', 'Malitson', '1965:', 'n',
+                                            '0.21–6.7', 'µm', '[Fused', 'silica]'])
+
+    def test_path_gives_ids(self):
+        """The path of a line splits at / into the shelf, book and page of the constructor."""
+        hits = ri.search('polychlorotrifluoroethylene')
+        path = repr(hits).splitlines()[0].split('  ')[1].rstrip()
+        m = ri.RefractiveIndexMaterial(*path.split('/'))
+        self.assertEqual(repr(m), repr(hits[0].material()))
+
+    def test_prints_all(self):
+        """All matches are printed, also many; a slice prints fewer."""
+        hits = ri.search('Si')
+        self.assertGreater(len(hits), 100)
+        self.assertEqual(len(repr(hits).splitlines()), len(hits))
+        self.assertEqual(len(repr(hits[:10]).splitlines()), 10)
+        self.assertEqual(str(hits), repr(hits))
+
+    def test_slice_and_add(self):
+        """Slices and + keep the print, numbered from 0."""
+        hits = ri.search('SiO2')
+        part = hits[5:8]
+        self.assertEqual(list(part), list(hits)[5:8])
+        self.assertEqual([line.split()[0] for line in repr(part).splitlines()], ['0', '1', '2'])
+        both = hits[:2] + ri.search('Au')[:2]
+        self.assertEqual(len(repr(both).splitlines()), 4)
+        self.assertIsInstance(hits[0], type(hits[1]))
+
+
+class TestSearchTestDatabase(unittest.TestCase):
+    """ri.search and the repr of materials with a small database given by db_path."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls._tempdir = tempfile.TemporaryDirectory()
+        cls.db_path = Path(cls._tempdir.name)
+        (cls.db_path / 'catalog-nk.yml').write_text(_TEST_CATALOG, encoding='utf-8')
+        (cls.db_path / 'data' / 'main' / 'X2').mkdir(parents=True)
+        (cls.db_path / 'data' / 'main' / 'X2' / 'Good.yml').write_text(_TEST_DATA, encoding='utf-8')
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._tempdir.cleanup()
+
+    def test_names_without_html(self):
+        """HTML tags are removed from names, so 'X<sub>2</sub>' is found as 'X2'."""
+        hits = ri.search('test material', db_path=self.db_path)
+        self.assertEqual(hits[0].book_name, 'X2 (Test material)')
+
+    def test_page_listed_twice(self):
+        """A page that the catalog lists twice is found once, with its first divider."""
+        hits = ri.search('Good', db_path=self.db_path)
+        self.assertEqual([(m.page, m.divider) for m in hits], [('Good', 'First')])
+
+    def test_broken_page(self):
+        """Filters skip a page whose data cannot be loaded, with one warning that names it."""
+        self.assertEqual([m.page for m in ri.search(db_path=self.db_path)], ['Good', 'Broken'])
+        with self.assertWarnsRegex(UserWarning, r'Skipped 1 page .*main/X2/Broken \(FileNotFoundError') as cm:
+            hits = ri.search(wavelength=500, db_path=self.db_path)
+        self.assertEqual(cm.filename, __file__)
+        self.assertEqual([m.page for m in hits], ['Good'])
+
+    def test_db_path_in_code(self):
+        """Matches load from db_path, and the material shows db_path= if it is not the included database."""
+        hits = ri.search('Good', db_path=str(self.db_path))
+        self.assertAlmostEqual(float(hits[0].material().get_refractive_index(400)), 1.5)
+        code = f"RefractiveIndexMaterial(shelf='main', book='X2', page='Good', db_path={str(self.db_path)!r})"
+        self.assertEqual(repr(hits[0].material()), code)
+
+
+class TestMaterialRepr(unittest.TestCase):
+    """RefractiveIndexMaterial prints as the code that loads it."""
+
+    def test_repr(self):
+        from refractiveindex.refractiveindex import _DEFAULT_DB_PATH
+        code = "RefractiveIndexMaterial(shelf='main', book='SiO2', page='Malitson')"
+        for db_path in (None, _DEFAULT_DB_PATH, str(_DEFAULT_DB_PATH)):
+            with self.subTest(db_path=db_path):
+                m = ri.RefractiveIndexMaterial(shelf='main', book='SiO2', page='Malitson', db_path=db_path)
+                self.assertEqual(repr(m), code)
+        m = ri.RefractiveIndexMaterial.from_url('https://refractiveindex.info/?shelf=main&book=CaSO4&page=Querry-%CE%B2')
+        self.assertEqual(repr(m), "RefractiveIndexMaterial(shelf='main', book='CaSO4', page='Querry-β')")
+

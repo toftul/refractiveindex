@@ -1,6 +1,10 @@
+import difflib
+import re
 import urllib.parse
 import warnings
+from dataclasses import dataclass, field
 from pathlib import Path
+from typing import NamedTuple
 
 import numpy as np
 import scipy.interpolate
@@ -16,7 +20,7 @@ except ImportError:
 # upstream release, and _database_version.py records which release it is.
 _DEFAULT_DB_PATH = Path(__file__).parent / "database"
 
-# Module-level cache: db_path -> {(shelf, book, page): filepath}
+# Module-level cache: db_path -> {(shelf, book, page): _CatalogEntry with the full filepath}
 _catalog_cache = {}
 
 # Temporary fixes for errors in the upstream catalog: (shelf, book, page) -> (bad_path, good_path).
@@ -41,8 +45,24 @@ class _Deprecated:
 _DEPRECATED = _Deprecated()
 
 
+class _CatalogEntry(NamedTuple):
+    """A page of the catalog. Names are without HTML tags, so 'SiO<sub>2</sub>' is 'SiO2'."""
+
+    path: str | Path  # data path relative to data/ from _read_catalog, full filepath from _load_catalog
+    book_name: str
+    name: str
+    divider: str | None  # the divider above the page in its book
+
+
+def _strip_html(text):
+    return re.sub(r"<[^>]+>", "", text)
+
+
 def _read_catalog(db_path):
-    """Parse catalog-nk.yml as is into {(shelf, book, page): data path relative to data/}."""
+    """Parse catalog-nk.yml as is into {(shelf, book, page): _CatalogEntry}.
+
+    A page that the catalog lists twice in a book keeps its first entry.
+    """
     catalog_file = db_path / "catalog-nk.yml"
     if not catalog_file.is_file():
         raise FileNotFoundError(
@@ -61,10 +81,17 @@ def _read_catalog(db_path):
             if "DIVIDER" in book_entry:
                 continue
             book_name = book_entry["BOOK"]
+            book_title = _strip_html(book_entry.get("name", ""))
+            divider = None
             for page_entry in book_entry.get("content", []):
                 if "DIVIDER" in page_entry:
+                    divider = _strip_html(page_entry["DIVIDER"])
                     continue
-                entries[(shelf_name, book_name, page_entry["PAGE"])] = page_entry["data"]
+                entries.setdefault(
+                    (shelf_name, book_name, page_entry["PAGE"]),
+                    _CatalogEntry(page_entry["data"], book_title,
+                                  _strip_html(page_entry.get("name", "")), divider),
+                )
     return entries
 
 
@@ -74,11 +101,12 @@ def _load_catalog(db_path):
         return _catalog_cache[key]
 
     index = {}
-    for material_key, data_rel in _read_catalog(db_path).items():
+    for material_key, entry in _read_catalog(db_path).items():
+        data_rel = entry.path
         fix = _CATALOG_FIXES.get(material_key)
         if fix is not None and data_rel == fix[0]:
             data_rel = fix[1]
-        index[material_key] = db_path / "data" / Path(data_rel)
+        index[material_key] = entry._replace(path=db_path / "data" / Path(data_rel))
 
     _catalog_cache[key] = index
     return index
@@ -251,6 +279,9 @@ _EXP_TYPES = {
 # Values of quantity in get_wl_range. 'nk' is another name for 'epsilon': the overlap of n and k.
 _WL_RANGE_QUANTITIES = ("epsilon", "nk", "n", "k")
 
+# Relative distance from a range end that counts as on the end, for rounding in unit conversion
+_RANGE_RTOL = 1e-9
+
 
 def _make_interpolator(wavelengths, values):
     if len(wavelengths) == 1:
@@ -260,7 +291,7 @@ def _make_interpolator(wavelengths, values):
 
     # Unit conversion can move a range end a few ulp out of the table, so that the
     # wavelengths from get_wl_range would give nan. Move such wavelengths onto the end.
-    rtol = 1e-9
+    rtol = _RANGE_RTOL
     lo, hi = np.min(wavelengths), np.max(wavelengths)
 
     def interpolate(wl):
@@ -269,6 +300,14 @@ def _make_interpolator(wavelengths, values):
         return interp(np.where(in_range, np.clip(wl, lo, hi), wl))
 
     return interpolate
+
+
+def _material_code(shelf, book, page, db_path):
+    """The code that loads a page, with db_path= only if it is not the included database."""
+    args = f"shelf={shelf!r}, book={book!r}, page={page!r}"
+    if db_path != _DEFAULT_DB_PATH:
+        args += f", db_path={str(db_path)!r}"
+    return f"RefractiveIndexMaterial({args})"
 
 
 class NoExtinctionCoefficient(Exception):
@@ -312,7 +351,9 @@ class RefractiveIndexMaterial:
         key = (shelf, book, page)
         if key not in catalog:
             raise KeyError(f"Material not found: shelf={shelf!r}, book={book!r}, page={page!r}")
-        filepath = catalog[key]
+        filepath = catalog[key].path
+        self._key = key
+        self._db_path = db_path
 
         with open(filepath, "rt", encoding="utf-8") as f:
             material = yaml.load(f, Loader=BaseLoader)
@@ -372,6 +413,9 @@ class RefractiveIndexMaterial:
                     "wavelength (um)": wl_sample,
                     "n": _compute_formula(formula_id, coefficients, wl_sample),
                 }
+
+    def __repr__(self):
+        return _material_code(*self._key, self._db_path)
 
     @classmethod
     def from_url(cls, url, *, db_path=None):
@@ -506,3 +550,178 @@ class RefractiveIndexMaterial:
                 "do not overlap. Use quantity='n' or quantity='k'."
             )
         return convert((lo, hi))
+
+
+@dataclass(frozen=True)
+class Match:
+    """A page found by search(). material() loads it."""
+
+    shelf: str
+    book: str
+    page: str
+    book_name: str
+    name: str
+    divider: str | None
+    db_path: Path = field(repr=False, compare=False)
+
+    def material(self):
+        """Load the page as a RefractiveIndexMaterial, from the database that search() used."""
+        return RefractiveIndexMaterial(self.shelf, self.book, self.page, db_path=self.db_path)
+
+
+class _SearchResults(list):
+    """The list of Match from search(). Prints one line per match: index, shelf/book/page, name."""
+
+    def __getitem__(self, index):
+        result = super().__getitem__(index)
+        return _SearchResults(result) if isinstance(index, slice) else result
+
+    def __add__(self, other):
+        result = super().__add__(other)
+        return result if result is NotImplemented else _SearchResults(result)
+
+    def __repr__(self):
+        if not self:
+            return "No matches"
+        paths = [f"{m.shelf}/{m.book}/{m.page}" for m in self]
+        number_width = len(str(len(self) - 1))
+        path_width = max(len(path) for path in paths)
+        lines = []
+        for i, (match, path) in enumerate(zip(self, paths)):
+            description = match.name if match.divider is None else f"{match.name} [{match.divider}]"
+            lines.append(f"{i:>{number_width}}  {path:<{path_width}}  {description}")
+        return "\n".join(lines)
+
+
+def _search_ids(value, name, catalog_ids):
+    """The ids given as shelf= or book= of search(), as a set. None if not given."""
+    if value is None:
+        return None
+    ids = [value] if isinstance(value, str) else list(value)
+    valid = dict.fromkeys(catalog_ids)
+    for id_ in ids:
+        if id_ in valid:
+            continue
+        if name == "shelf":
+            hint = f" Shelves: {', '.join(map(repr, valid))}."
+        else:
+            close = ([v for v in valid if v.lower() == str(id_).lower()]
+                     or difflib.get_close_matches(str(id_), valid, n=3))
+            hint = f" Did you mean {' or '.join(map(repr, close))}?" if close else ""
+        raise ValueError(f"No {name} {id_!r} in the catalog.{hint}")
+    return set(ids)
+
+
+def _search_tier(words, book, page, entry):
+    """Rank of a page for the lower-case query words, 0 best, or None if a word is not found.
+
+    0: a word is the book id. 1: a word is a whole word of the book name.
+    2: a word is part of the book id. 3: a word is somewhere else.
+    """
+    book_lower = book.lower()
+    book_name = entry.book_name.lower()
+    text = " ".join((book_lower, page.lower(), book_name, entry.name.lower(), (entry.divider or "").lower()))
+    best = 3
+    for word in words:
+        if word not in text:
+            return None
+        if word == book_lower:
+            tier = 0
+        elif re.search(rf"(?<!\w){re.escape(word)}(?!\w)", book_name):
+            tier = 1
+        elif word in book_lower:
+            tier = 2
+        else:
+            tier = 3
+        best = min(best, tier)
+    return best
+
+
+def search(query=None, *, shelf=None, book=None, quantity=None, wavelength=None, unit="nm", db_path=None):
+    """Find pages of the database by text, shelf, book and the range of their data.
+
+    Args:
+        query: Words to find, for example 'SiO2', 'silica' or 'SiO2 Malitson'. Each word must
+              appear, ignoring case, in the book or page id, the book or page name, or the
+              divider above the page in its book. None (default) finds every page.
+        shelf: Shelf id or a list of them, for example 'main'. Exact and case-sensitive.
+        book: Book id or a list of them, for example 'SiO2'. Exact and case-sensitive.
+        quantity: Keep only the pages that have this data, as in get_wl_range: 'n', 'k',
+              or 'epsilon' or 'nk', which need n data only. A page is kept if
+              get_wl_range(quantity=quantity) gives a range.
+        wavelength: Keep only the pages whose range for quantity (default 'epsilon') contains
+              this wavelength, or all of a (min, max) interval. The ends count as inside.
+        unit: Unit of wavelength. Supported: 'm', 'mm', 'um', 'nm' (default),
+              'A' (Angstrom), 'cm-1', 'THz', 'eV'.
+        db_path: The database/ folder to search, as for RefractiveIndexMaterial.
+              None (default) is the database included in the package.
+
+    Returns:
+        A list of Match, best first: pages whose book id is a query word, then pages with a
+        query word in the book name, then pages whose book id contains a query word, then
+        the others, each group in catalog order. It prints one line per match: its index,
+        shelf/book/page, and the page name with the divider in brackets. Slice it to print
+        fewer. Match.material() loads a page.
+
+    Raises:
+        ValueError: shelf or book is not in the catalog, quantity or unit is unknown,
+              or wavelength is not a number or a pair of numbers.
+
+    Warns:
+        UserWarning: With quantity or wavelength, pages whose data cannot be loaded are skipped.
+    """
+    db_path = _DEFAULT_DB_PATH if db_path is None else Path(db_path)
+    catalog = _load_catalog(db_path)
+    shelves = _search_ids(shelf, "shelf", (key[0] for key in catalog))
+    books = _search_ids(book, "book", (key[1] for key in catalog))
+    if quantity is not None and quantity not in _WL_RANGE_QUANTITIES:
+        raise ValueError(f"quantity must be one of {list(_WL_RANGE_QUANTITIES)}, got {quantity!r}")
+    if unit not in _UNITS:
+        raise ValueError(f"unit must be one of {list(_UNITS)}, got {unit!r}")
+    wl_range = None
+    if wavelength is not None:
+        wl_um = _to_um(wavelength, unit)
+        if wl_um.shape not in ((), (2,)):
+            raise ValueError(f"wavelength must be a number or a (min, max) pair, got {wavelength!r}")
+        # Sorted after conversion, as reciprocal units reverse the order
+        wl_range = (wl_um.min(), wl_um.max())
+
+    words = [] if query is None else query.lower().split()
+    ranked = []
+    for order, ((shelf_id, book_id, page_id), entry) in enumerate(catalog.items()):
+        if shelves is not None and shelf_id not in shelves:
+            continue
+        if books is not None and book_id not in books:
+            continue
+        tier = _search_tier(words, book_id, page_id, entry)
+        if tier is not None:
+            match = Match(shelf_id, book_id, page_id, entry.book_name, entry.name, entry.divider, db_path)
+            ranked.append((tier, order, match))
+    ranked.sort(key=lambda item: item[:2])
+    matches = [match for _, _, match in ranked]
+
+    if quantity is not None or wl_range is not None:
+        kept, failed = [], []
+        for match in matches:
+            try:
+                # Some formulas give nan inside their own range when the constructor samples them
+                with np.errstate(all="ignore"):
+                    material = match.material()
+            except Exception as e:
+                failed.append(f"{match.shelf}/{match.book}/{match.page} ({type(e).__name__}: {e})")
+                continue
+            try:
+                lo, hi = material.get_wl_range(unit="um", quantity=quantity or "epsilon")
+            except Exception:
+                continue  # No data for quantity, or the n and k data do not overlap
+            if wl_range is None or (lo * (1 - _RANGE_RTOL) <= wl_range[0]
+                                    and wl_range[1] <= hi * (1 + _RANGE_RTOL)):
+                kept.append(match)
+        if failed:
+            warnings.warn(
+                f"Skipped {len(failed)} page{'s' if len(failed) > 1 else ''} that could not be loaded: "
+                + ", ".join(failed),
+                UserWarning, stacklevel=2,
+            )
+        matches = kept
+    return _SearchResults(matches)

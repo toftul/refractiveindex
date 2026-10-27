@@ -67,7 +67,58 @@ The default time dependence is $\mathrm{e}^{-\mathrm{i} \omega t}$, so $\varepsi
 
 - Spaces in names become underscores: `page='Rodriguez-de_Marcos'`, not `page='Rodriguez-de Marcos'`.
 - The address-bar URL `https://refractiveindex.info/?shelf=main&book=SiO2&page=Malitson` gives `shelf='main'`, `book='SiO2'`, `page='Malitson'`. `from_url` reads these three names and nothing else; other URLs, such as links to data files, raise `ValueError`.
-- You can also find the names in the folders of the [upstream repository](https://github.com/polyanskiy/refractiveindex.info-database).
+- You can also find the names with `ri.search` (see below), or in the folders of the [upstream repository](https://github.com/polyanskiy/refractiveindex.info-database).
+
+## Search
+
+`ri.search(query)` finds pages in the catalog of the database. It prints one line per page: the index, `shelf/book/page`, and the page name with its group in the book in brackets:
+
+```python
+>>> ri.search('SiO2')
+ 0  main/SiO2/Malitson                       Malitson 1965: n 0.21–6.7 µm [Fused silica]
+ 1  main/SiO2/Nyakuchena                     Nyakuchena et al. 2023: n 1.10–1.65 µm [Fused silica]
+...
+16  main/Bi12SiO20/Gospodinov                Gospodinov et al. 1988: n 0.48–0.70 µm
+17  main/Ag/Ciesielski                       Ciesielski et al. 2017: Ag/SiO2; n,k 0.191–20.9 µm [Experimental data: thin film]
+...
+```
+
+The result is a list. The number of a line is its index, so `ri.search('SiO2')[0].material()` loads the first page. The material prints as the code that loads it, to copy into a script:
+
+```python
+>>> ri.search('SiO2')[0].material()
+RefractiveIndexMaterial(shelf='main', book='SiO2', page='Malitson')
+```
+
+No id contains `/`, so `shelf/book/page` always splits into the three ids. A few book ids contain spaces, so the columns are separated by two spaces. To print fewer lines, slice the list: `ri.search('Si')[:10]` prints the first 10, numbered from 0. An item of the list is a `Match` with the fields `shelf`, `book`, `page`, `book_name`, `name` (the page name) and `divider` (the group, or `None`).
+
+Each word of the query must appear, ignoring case, in the book or page id, the book or page name, or the group. The book names include common names, so `'silica'` and `'quartz'` find SiO2, and the page names include authors, so `'SiO2 Malitson'` finds one page. The best matches come first:
+
+1. The book id is a query word (`'SiO2'` finds `main/SiO2`).
+2. A query word is a whole word of the book name (`'silica'` in "SiO2 (Silicon dioxide, Silica, Quartz)").
+3. The book id contains a query word (`'SiO2'` finds `Bi12SiO20`).
+4. A query word is somewhere else, for example in a page name (`'SiO2'` finds "Ag/SiO2").
+
+Pages with the same rank keep the order of the catalog, which is the order on the website.
+
+Keyword arguments select pages:
+
+| Argument | Keeps the pages |
+|---|---|
+| `shelf='main'` | on this shelf; also a list of shelves |
+| `book='SiO2'` | of this book; also a list of books |
+| `quantity='n'`, `'k'`, `'epsilon'` or `'nk'` | for which `get_wl_range(quantity=...)` gives a range: with n data, with k data, or with n data for `'epsilon'` and `'nk'` (see [Wavelength range](#wavelength-range)) |
+| `wavelength=1550` or `wavelength=(400, 800)` | whose range for `quantity` (default `'epsilon'`) contains the wavelength, or all of the interval. The ends count as inside. `unit=` gives the unit, as for the other functions. |
+
+```python
+ri.search('SiO2', shelf='main', wavelength=(400, 800))  # data for all of 400–800 nm
+ri.search('gold', quantity='k', wavelength=1.55, unit='um')
+ri.search(shelf='glass')                                 # without a query, all pages that the filters keep
+```
+
+`shelf` and `book` are exact ids, so an unknown id raises `ValueError`. No matches give an empty list. Some data is on more than one shelf, for example `glass/fused_silica/Malitson` and `main/SiO2/Malitson`. Search shows each of these pages.
+
+For `quantity` and `wavelength`, search loads each matching page. A page whose data cannot be loaded is left out, with a `UserWarning` that names it.
 
 ## Supported data
 

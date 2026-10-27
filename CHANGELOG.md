@@ -13,6 +13,13 @@ The version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.
   The data comes from the included database (or `db_path=`), not from the website.
 - `get_wl_range(quantity=...)` selects the range: `'n'` for the n data, `'k'` for the k data,
   or `'epsilon'` (the default) or `'nk'` for the overlap of the two.
+- `ri.search(query)` finds pages by words in their book and page ids and names, best match first,
+  for example `ri.search('SiO2')` or `ri.search('silica')`.
+  `shelf=`, `book=`, `quantity=` and `wavelength=` (with `unit=`) select pages.
+  The result prints one line per page, `index  shelf/book/page  page name [group]`,
+  and `ri.search('SiO2')[0].material()` loads one.
+- `RefractiveIndexMaterial` prints as the code that loads it,
+  for example `RefractiveIndexMaterial(shelf='main', book='SiO2', page='Malitson')`.
 
 ### Changed
 
